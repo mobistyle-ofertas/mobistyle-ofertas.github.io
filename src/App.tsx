@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
 import { Bike, Cpu, Shield, ChevronRight, ExternalLink, MapPin, Tag, Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -896,11 +897,9 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
         </div>
 
         <div className="prose prose-zinc prose-sm max-w-none">
-          {news.content?.split('\n\n').map((paragraph, idx) => (
-            <p key={idx} className="text-zinc-700 leading-relaxed mb-4 text-base">
-              {paragraph}
-            </p>
-          ))}
+          <ReactMarkdown>
+            {news.content || ''}
+          </ReactMarkdown>
         </div>
       </div>
 
