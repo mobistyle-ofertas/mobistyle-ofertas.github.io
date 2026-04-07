@@ -1408,16 +1408,24 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
 export default function App() {
   const [data, setData] = useState<SiteData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+        
         const [baseRes, newsRes, usedBikesRes, affiliatesRes] = await Promise.all([
-          fetch(`${import.meta.env.BASE_URL}base.json`),
-          fetch(`${import.meta.env.BASE_URL}news.json`),
-          fetch(`${import.meta.env.BASE_URL}used_bikes.json`),
-          fetch(`${import.meta.env.BASE_URL}affiliates.json`)
+          fetch(`${normalizedBaseUrl}base.json`),
+          fetch(`${normalizedBaseUrl}news.json`),
+          fetch(`${normalizedBaseUrl}used_bikes.json`),
+          fetch(`${normalizedBaseUrl}affiliates.json`)
         ]);
+
+        if (!baseRes.ok || !newsRes.ok || !usedBikesRes.ok || !affiliatesRes.ok) {
+          throw new Error(`Falha ao carregar arquivos de dados: ${baseRes.status} ${newsRes.status}`);
+        }
 
         const base = await baseRes.json();
         const news = await newsRes.json();
@@ -1442,6 +1450,7 @@ export default function App() {
         setLoading(false);
       } catch (err) {
         console.error("Error loading data:", err);
+        setError(err instanceof Error ? err.message : 'Erro desconhecido ao carregar dados');
         setLoading(false);
       }
     };
@@ -1455,6 +1464,26 @@ export default function App() {
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-zinc-200 border-t-zinc-900 rounded-full animate-spin"></div>
           <p className="font-display font-medium text-zinc-500">Carregando MobiStyle...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-50 p-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-zinc-100 text-center">
+          <div className="w-12 h-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <X className="w-6 h-6" />
+          </div>
+          <h2 className="text-xl font-display font-bold mb-2">Erro ao carregar o site</h2>
+          <p className="text-zinc-500 text-sm mb-6">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="w-full py-3 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-colors"
+          >
+            Tentar Novamente
+          </button>
         </div>
       </div>
     );
