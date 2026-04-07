@@ -86,14 +86,14 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
     };
   }, [isOpen]);
 
+  const getModelsByCategory = (catId: string) => {
+    return data?.models.filter(m => m.categoryId === catId && m.affiliates.length > 0) || [];
+  };
+
   const nonEmptyCategories = useMemo(() => {
     if (!data) return [];
-    return data.categories;
+    return data.categories.filter(cat => getModelsByCategory(cat.id).length > 0);
   }, [data]);
-
-  const getModelsByCategory = (catId: string) => {
-    return data?.models.filter(m => m.categoryId === catId) || [];
-  };
 
   const NavItem = ({ to, label, catId }: any) => {
     const models = catId ? getModelsByCategory(catId) : [];
