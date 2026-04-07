@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://mobistyle-ofertas.github.io/sitemap.xml
