@@ -1,4 +1,11 @@
 {
+  "socialLinks": {
+    "instagram": "https://www.instagram.com/mobistyle_ofertas",
+    "facebook": "",
+    "bluesky": "",
+    "tiktok": "",
+    "whatsapp": ""
+  },
   "categories": [
     {
       "id": "motos-scooters",

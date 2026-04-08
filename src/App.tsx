@@ -1,7 +1,44 @@
 import { useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
-import { Bike, Cpu, Shield, ChevronRight, ExternalLink, MapPin, Tag, Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
+import { Bike, Cpu, Shield, ChevronRight, ExternalLink, MapPin, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy } from 'lucide-react';
+
+// Custom Brand Icons (removed from recent lucide-react versions)
+const Instagram = (props: any) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+  </svg>
+);
+
+const Facebook = (props: any) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
 import { motion, AnimatePresence } from 'motion/react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 
@@ -58,9 +95,98 @@ interface SiteData {
   categories: Category[];
   models: Model[];
   homeNews: NewsItem[];
+  socialLinks?: {
+    instagram?: string;
+    facebook?: string;
+    bluesky?: string;
+    tiktok?: string;
+    whatsapp?: string;
+  };
 }
 
 // Components
+const ShareButtons = ({ title, url }: { title: string; url: string }) => {
+  const [copied, setCopied] = useState(false);
+  const shareUrl = window.location.origin + url;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareData = {
+    title: title,
+    text: title,
+    url: shareUrl,
+  };
+
+  const handleNativeShare = async () => {
+    try {
+      await navigator.share(shareData);
+    } catch (err) {
+      console.log('Error sharing:', err);
+    }
+  };
+
+  const socialLinks = [
+    {
+      name: 'WhatsApp',
+      icon: <MessageCircleCheck className="w-4 h-4" />,
+      url: `https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + shareUrl)}`,
+      color: 'hover:bg-green-500 hover:text-white'
+    },
+    {
+      name: 'Facebook',
+      icon: <Facebook className="w-4 h-4" />,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+      color: 'hover:bg-blue-600 hover:text-white'
+    },
+    {
+      name: 'Bluesky',
+      icon: <MessagesSquare className="w-4 h-4" />,
+      url: `https://bsky.app/intent/compose?text=${encodeURIComponent(title + ' ' + shareUrl)}`,
+      color: 'hover:bg-blue-500 hover:text-white'
+    }
+  ];
+
+  return (
+    <div className="flex items-center gap-2">
+      {navigator.share && (
+        <button 
+          onClick={handleNativeShare}
+          className="p-2 rounded-full bg-zinc-100 text-zinc-600 hover:bg-zinc-900 hover:text-white transition-all"
+          title="Compartilhar"
+        >
+          <Share2 className="w-4 h-4" />
+        </button>
+      )}
+      
+      {socialLinks.map(link => (
+        <a 
+          key={link.name}
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`p-2 rounded-full bg-zinc-100 text-zinc-600 transition-all ${link.color}`}
+          title={`Compartilhar no ${link.name}`}
+        >
+          {link.icon}
+        </a>
+      ))}
+
+      <button 
+        onClick={handleCopy}
+        className={`p-2 rounded-full transition-all flex items-center gap-2 ${copied ? 'bg-green-100 text-green-600' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-900 hover:text-white'}`}
+        title="Copiar link"
+      >
+        <Copy className="w-4 h-4" />
+        {copied && <span className="text-[10px] font-bold pr-1">Copiado!</span>}
+      </button>
+    </div>
+  );
+};
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -249,9 +375,39 @@ const Footer = ({ data }: { data: SiteData | null }) => (
             </div>
             <span className="font-display font-bold text-lg text-white tracking-tight">MobiStyle Ofertas</span>
           </div>
-          <p className="text-xs leading-relaxed max-w-xs">
+          <p className="text-xs leading-relaxed max-w-xs mb-6">
             Sua fonte de notícias e curadoria de ofertas em acessórios para mobilidade urbana e estilo de vida.
           </p>
+          
+          {data?.socialLinks && (
+            <div className="flex items-center gap-5">
+              {data.socialLinks.instagram && (
+                <a href={data.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Instagram">
+                  <Instagram className="w-8 h-8" />
+                </a>
+              )}
+              {data.socialLinks.facebook && (
+                <a href={data.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Facebook">
+                  <Facebook className="w-8 h-8" />
+                </a>
+              )}
+              {data.socialLinks.tiktok && (
+                <a href={data.socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="TikTok">
+                  <Music className="w-8 h-8" />
+                </a>
+              )}
+              {data.socialLinks.bluesky && (
+                <a href={data.socialLinks.bluesky} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Bluesky">
+                  <MessagesSquare className="w-8 h-8" />
+                </a>
+              )}
+              {data.socialLinks.whatsapp && (
+                <a href={data.socialLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="WhatsApp">
+                  <MessageCircleCheck className="w-8 h-8" />
+                </a>
+              )}
+            </div>
+          )}
         </div>
         <div>
           <h4 className="text-white text-xs font-bold uppercase tracking-widest mb-4">Links</h4>
@@ -332,6 +488,9 @@ const Home = ({ data }: { data: SiteData | null }) => {
 
   const visibleNews = allNews.slice(0, newsLimit);
 
+  const location = useLocation();
+  const canonicalUrl = window.location.origin + location.pathname;
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
@@ -341,6 +500,21 @@ const Home = ({ data }: { data: SiteData | null }) => {
       <Helmet>
         <title>MobiStyle | Home</title>
         <meta name="description" content="MobiStyle Ofertas. Curadoria de mobilidade urbana e tecnologia." />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content="MobiStyle | Home" />
+        <meta property="og:description" content="MobiStyle Ofertas. Curadoria de mobilidade urbana e tecnologia." />
+        <meta property="og:image" content={`${window.location.origin}/images/news/sobre.png`} />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={canonicalUrl} />
+        <meta property="twitter:title" content="MobiStyle | Home" />
+        <meta property="twitter:description" content="MobiStyle Ofertas. Curadoria de mobilidade urbana e tecnologia." />
+        <meta property="twitter:image" content={`${window.location.origin}/images/news/sobre.png`} />
       </Helmet>
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
@@ -390,6 +564,29 @@ const Home = ({ data }: { data: SiteData | null }) => {
                         {news.summary}
                       </p>
                     )}
+
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-[10px] font-bold text-white/80 group-hover:text-white transition-colors">Ler mais</span>
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (navigator.share) {
+                            navigator.share({
+                              title: news.title,
+                              url: window.location.origin + `/noticia/${news.id}`
+                            });
+                          } else {
+                            navigator.clipboard.writeText(window.location.origin + `/noticia/${news.id}`);
+                            alert('Link copiado para a área de transferência!');
+                          }
+                        }}
+                        className="p-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-white/60 hover:text-white hover:bg-white/20 transition-all"
+                        title="Compartilhar"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </Link>
               </motion.div>
@@ -425,6 +622,28 @@ const Home = ({ data }: { data: SiteData | null }) => {
                       <span className="text-zinc-300 text-[9px] font-medium">{news.date}</span>
                     </div>
                     <h3 className="text-sm font-bold group-hover:text-zinc-700 transition-colors line-clamp-2 leading-snug">{news.title}</h3>
+                    <div className="mt-3 pt-3 border-t border-zinc-50 flex items-center justify-between">
+                      <span className="text-[10px] font-bold hover:underline">Ler mais</span>
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (navigator.share) {
+                            navigator.share({
+                              title: news.title,
+                              url: window.location.origin + `/noticia/${news.id}`
+                            });
+                          } else {
+                            navigator.clipboard.writeText(window.location.origin + `/noticia/${news.id}`);
+                            alert('Link copiado para a área de transferência!');
+                          }
+                        }}
+                        className="p-1.5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors"
+                        title="Compartilhar"
+                      >
+                        <Share2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </Link>
               </motion.div>
@@ -491,6 +710,9 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
 
   const isMenuMode = ['equipamentos', 'gadgets', 'motos-scooters'].includes(categoryId || '');
 
+  const location = useLocation();
+  const canonicalUrl = window.location.origin + location.pathname;
+
   if (!category) return <div className="p-20 text-center">Categoria não encontrada.</div>;
 
   return (
@@ -502,6 +724,21 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
       <Helmet>
         <title>{category.name} | MobiStyle</title>
         <meta name="description" content={category.description} />
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={`${category.name} | MobiStyle`} />
+        <meta property="og:description" content={category.description} />
+        <meta property="og:image" content={`${window.location.origin}/images/news/sobre.png`} />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary" />
+        <meta property="twitter:url" content={canonicalUrl} />
+        <meta property="twitter:title" content={`${category.name} | MobiStyle`} />
+        <meta property="twitter:description" content={category.description} />
+        <meta property="twitter:image" content={`${window.location.origin}/images/news/sobre.png`} />
       </Helmet>
       <div className="mb-8">
         <div className="flex items-center gap-3 text-[10px] text-zinc-400 mb-3 uppercase tracking-widest font-bold">
@@ -635,6 +872,10 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [filteredNews.length]);
 
+  const canonicalUrl = window.location.origin + location.pathname;
+  const pageTitle = selectedCategory ? `${selectedCategory} - Notícias` : 'Todas as Notícias';
+  const pageDesc = "Fique por dentro das últimas notícias sobre mobilidade urbana, tecnologia e estilo de vida.";
+
   if (!data) return null;
 
   return (
@@ -644,8 +885,23 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
     >
       <Helmet>
-        <title>{selectedCategory ? `${selectedCategory} - Notícias` : 'Todas as Notícias'} | MobiStyle</title>
-        <meta name="description" content="Fique por dentro das últimas notícias sobre mobilidade urbana, tecnologia e estilo de vida." />
+        <title>{pageTitle} | MobiStyle</title>
+        <meta name="description" content={pageDesc} />
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={`${pageTitle} | MobiStyle`} />
+        <meta property="og:description" content={pageDesc} />
+        <meta property="og:image" content={`${window.location.origin}/images/news/sobre.png`} />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary" />
+        <meta property="twitter:url" content={canonicalUrl} />
+        <meta property="twitter:title" content={`${pageTitle} | MobiStyle`} />
+        <meta property="twitter:description" content={pageDesc} />
+        <meta property="twitter:image" content={`${window.location.origin}/images/news/sobre.png`} />
       </Helmet>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
@@ -690,24 +946,50 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
             viewport={{ once: true }}
             className="group bg-white rounded-xl overflow-hidden border border-zinc-100 hover:border-zinc-200 transition-all"
           >
-            <div className="aspect-[16/9] overflow-hidden bg-zinc-50">
-              <img 
-                src={news.image || `/images/news/${news.id}.jpg`} 
-                alt={news.title} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                referrerPolicy="no-referrer"
-              />
-            </div>
-            <div className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-zinc-400 text-[9px] font-bold uppercase tracking-wider">
-                  {news.category}
-                </span>
-                <span className="text-zinc-300 text-[9px] font-medium">{news.date}</span>
+            <Link to={`/noticia/${news.id}`} className="block h-full">
+              <div className="aspect-[16/9] overflow-hidden bg-zinc-50">
+                <img 
+                  src={news.image || `/images/news/${news.id}.jpg`} 
+                  alt={news.title} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                />
               </div>
-              <h3 className="text-sm font-bold mb-2 group-hover:text-zinc-700 transition-colors line-clamp-2 leading-snug">{news.title}</h3>
-              <p className="text-zinc-500 text-[11px] line-clamp-2 leading-snug">{news.summary}</p>
-            </div>
+              <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-zinc-400 text-[9px] font-bold uppercase tracking-wider">
+                    {news.category}
+                  </span>
+                  <span className="text-zinc-300 text-[9px] font-medium">{news.date}</span>
+                </div>
+                <h3 className="text-sm font-bold mb-2 group-hover:text-zinc-700 transition-colors line-clamp-2 leading-snug">{news.title}</h3>
+                <p className="text-zinc-500 text-[11px] line-clamp-2 leading-snug mb-4">{news.summary}</p>
+                <div className="flex items-center justify-between mt-auto pt-3 border-t border-zinc-50">
+                  <span className="text-[10px] font-bold hover:underline">
+                    Ler mais
+                  </span>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (navigator.share) {
+                        navigator.share({
+                          title: news.title,
+                          url: window.location.origin + `/noticia/${news.id}`
+                        });
+                      } else {
+                        navigator.clipboard.writeText(window.location.origin + `/noticia/${news.id}`);
+                        alert('Link copiado para a área de transferência!');
+                      }
+                    }}
+                    className="p-1.5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors"
+                    title="Compartilhar"
+                  >
+                    <Share2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </Link>
           </motion.div>
         ))}
       </div>
@@ -856,6 +1138,10 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
     };
   }, [data, newsId]);
 
+  const location = useLocation();
+  const canonicalUrl = window.location.origin + location.pathname;
+  const newsImage = news.image?.startsWith('http') ? news.image : `${window.location.origin}${news.image || `/images/news/${news.id}.jpg`}`;
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -865,6 +1151,21 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
       <Helmet>
         <title>{news.title} | MobiStyle</title>
         <meta name="description" content={news.summary} />
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={`${news.title} | MobiStyle`} />
+        <meta property="og:description" content={news.summary} />
+        <meta property="og:image" content={newsImage} />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={canonicalUrl} />
+        <meta property="twitter:title" content={`${news.title} | MobiStyle`} />
+        <meta property="twitter:description" content={news.summary} />
+        <meta property="twitter:image" content={newsImage} />
       </Helmet>
 
       <div className="mb-8">
@@ -887,6 +1188,19 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
           {news.title}
         </h1>
 
+        <div className="flex items-center justify-between mb-8 pb-6 border-b border-zinc-100">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white text-[10px] font-bold">
+              MS
+            </div>
+            <div>
+              <div className="text-[10px] font-bold text-zinc-900 uppercase tracking-wider">MobiStyle Redação</div>
+              <div className="text-[9px] text-zinc-400 uppercase">{news.date}</div>
+            </div>
+          </div>
+          <ShareButtons title={news.title} url={`/noticia/${news.id}`} />
+        </div>
+
         <div className="aspect-[21/9] rounded-2xl overflow-hidden mb-8 bg-zinc-50 border border-zinc-100">
           <img 
             src={news.image || `/images/news/${news.id}.jpg`} 
@@ -896,10 +1210,15 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
           />
         </div>
 
-        <div className="prose prose-zinc prose-sm max-w-none">
+        <div className="prose prose-zinc prose-sm max-w-none mb-12">
           <ReactMarkdown>
             {news.content || ''}
           </ReactMarkdown>
+        </div>
+
+        <div className="flex flex-col items-center gap-4 py-8 border-y border-zinc-100 mb-12">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Gostou da notícia? Compartilhe!</span>
+          <ShareButtons title={news.title} url={`/noticia/${news.id}`} />
         </div>
       </div>
 
@@ -1060,6 +1379,10 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
     }
   };
 
+  const location = useLocation();
+  const canonicalUrl = window.location.origin + location.pathname;
+  const modelImage = model.image?.startsWith('http') ? model.image : `${window.location.origin}${model.image || `/images/models/${model.id}.jpg`}`;
+
   if (!isMotoOrScooter) {
     return (
       <motion.div 
@@ -1070,6 +1393,22 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
         <Helmet>
           <title>{model.name} | MobiStyle</title>
           <meta name="description" content={model.description} />
+          <link rel="canonical" href={canonicalUrl} />
+
+          {/* Open Graph / Facebook */}
+          <meta property="og:type" content="product" />
+          <meta property="og:url" content={canonicalUrl} />
+          <meta property="og:title" content={`${model.name} | MobiStyle`} />
+          <meta property="og:description" content={model.description} />
+          <meta property="og:image" content={modelImage} />
+
+          {/* Twitter */}
+          <meta property="twitter:card" content="summary_large_image" />
+          <meta property="twitter:url" content={canonicalUrl} />
+          <meta property="twitter:title" content={`${model.name} | MobiStyle`} />
+          <meta property="twitter:description" content={model.description} />
+          <meta property="twitter:image" content={modelImage} />
+
           <script type="application/ld+json">
             {JSON.stringify(structuredData)}
           </script>
@@ -1187,6 +1526,22 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
       <Helmet>
         <title>{model.name} | MobiStyle</title>
         <meta name="description" content={model.description} />
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="product" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={`${model.name} | MobiStyle`} />
+        <meta property="og:description" content={model.description} />
+        <meta property="og:image" content={modelImage} />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={canonicalUrl} />
+        <meta property="twitter:title" content={`${model.name} | MobiStyle`} />
+        <meta property="twitter:description" content={model.description} />
+        <meta property="twitter:image" content={modelImage} />
+
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>
@@ -1347,9 +1702,29 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                     <span className="text-[9px] text-zinc-300 uppercase font-bold">{n.date}</span>
                   </div>
                   <h3 className="text-xs font-bold mb-2 line-clamp-2 leading-snug">{n.title}</h3>
-                  <Link to={`/noticia/${n.id}`} className="inline-flex items-center gap-1 text-[10px] font-bold hover:underline">
-                    Ler mais <ChevronRight className="w-2.5 h-2.5" />
-                  </Link>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-50">
+                    <Link to={`/noticia/${n.id}`} className="inline-flex items-center gap-1 text-[10px] font-bold hover:underline">
+                      Ler mais <ChevronRight className="w-2.5 h-2.5" />
+                    </Link>
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (navigator.share) {
+                          navigator.share({
+                            title: n.title,
+                            url: window.location.origin + `/noticia/${n.id}`
+                          });
+                        } else {
+                          navigator.clipboard.writeText(window.location.origin + `/noticia/${n.id}`);
+                          alert('Link copiado para a área de transferência!');
+                        }
+                      }}
+                      className="p-1.5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors"
+                      title="Compartilhar"
+                    >
+                      <Share2 className="w-3 h-3" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {model.news.length > newsLimit && (
@@ -1444,7 +1819,8 @@ export default function App() {
         setData({
           categories: base.categories,
           models: mergedModels,
-          homeNews: homeNews
+          homeNews: homeNews,
+          socialLinks: base.socialLinks
         });
         setLoading(false);
       } catch (err) {
