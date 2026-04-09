@@ -544,6 +544,13 @@ const Home = ({ data }: { data: SiteData | null }) => {
                     alt={news.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (!target.src.includes('logo.png')) {
+                        target.src = '/images/logo.png';
+                        target.classList.add('invert', 'object-contain', 'p-12', 'bg-zinc-900');
+                      }
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-20" />
                   
@@ -612,6 +619,13 @@ const Home = ({ data }: { data: SiteData | null }) => {
                       alt={news.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (!target.src.includes('logo.png')) {
+                          target.src = '/images/logo.png';
+                          target.classList.add('invert', 'object-contain', 'p-8', 'bg-zinc-100');
+                        }
+                      }}
                     />
                   </div>
                   <div className="p-4 sm:p-5">
@@ -953,6 +967,13 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
                   alt={news.title} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (!target.src.includes('logo.png')) {
+                      target.src = '/images/logo.png';
+                      target.classList.add('invert', 'object-contain', 'p-8', 'bg-zinc-100');
+                    }
+                  }}
                 />
               </div>
               <div className="p-4">
@@ -1207,6 +1228,13 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
             alt={news.title} 
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              if (!target.src.includes('logo.png')) {
+                target.src = '/images/logo.png';
+                target.classList.add('invert', 'object-contain', 'p-16', 'bg-zinc-50');
+              }
+            }}
           />
         </div>
 
@@ -1310,6 +1338,13 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                       alt={n.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (!target.src.includes('logo.png')) {
+                          target.src = '/images/logo.png';
+                          target.classList.add('invert', 'object-contain', 'p-6', 'bg-zinc-50');
+                        }
+                      }}
                     />
                   </div>
                   <div className="p-3">
