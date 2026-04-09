@@ -1180,6 +1180,9 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
         <meta property="og:title" content={`${news.title} | MobiStyle`} />
         <meta property="og:description" content={news.summary} />
         <meta property="og:image" content={newsImage} />
+        <meta property="og:image:secure_url" content={newsImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
 
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
@@ -1436,6 +1439,9 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
           <meta property="og:title" content={`${model.name} | MobiStyle`} />
           <meta property="og:description" content={model.description} />
           <meta property="og:image" content={modelImage} />
+          <meta property="og:image:secure_url" content={modelImage} />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
 
           {/* Twitter */}
           <meta property="twitter:card" content="summary_large_image" />
@@ -1569,6 +1575,9 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
         <meta property="og:title" content={`${model.name} | MobiStyle`} />
         <meta property="og:description" content={model.description} />
         <meta property="og:image" content={modelImage} />
+        <meta property="og:image:secure_url" content={modelImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
 
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
