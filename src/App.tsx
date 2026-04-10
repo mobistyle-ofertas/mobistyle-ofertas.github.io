@@ -41,6 +41,7 @@ const Facebook = (props: any) => (
 );
 import { motion, AnimatePresence } from 'motion/react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
+import { supabase } from './lib/supabase';
 
 // Types
 // ... (rest of types)
@@ -1828,29 +1829,102 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [supaError, setSupaError] = useState<string | null>(null);
+  const [supaDataCount, setSupaDataCount] = useState<number>(0);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const baseUrl = import.meta.env.BASE_URL || '/';
         const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
         
-        const [baseRes, newsRes, usedBikesRes, affiliatesRes] = await Promise.all([
-          fetch(`${normalizedBaseUrl}base.json`),
-          fetch(`${normalizedBaseUrl}news.json`),
-          fetch(`${normalizedBaseUrl}used_bikes.json`),
-          fetch(`${normalizedBaseUrl}affiliates.json`)
-        ]);
+        const baseRes = await fetch(`${normalizedBaseUrl}base.json`);
+        if (!baseRes.ok) throw new Error(`Falha ao carregar base.json: ${baseRes.status}`);
+        const base = await baseRes.json();
 
-        if (!baseRes.ok || !newsRes.ok || !usedBikesRes.ok || !affiliatesRes.ok) {
-          throw new Error(`Falha ao carregar arquivos de dados: ${baseRes.status} ${newsRes.status}`);
+        let news: NewsItem[] = [];
+        let usedBikesData: Record<string, UsedBike[]> = {};
+        let affiliatesData: Record<string, AffiliateLink[]> = {};
+
+        const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
+        
+        if (isSupabaseConfigured) {
+          try {
+            const [newsResult, usedResult, affiliatesResult] = await Promise.all([
+              supabase.from('news').select('*').order('date', { ascending: false }),
+              supabase.from('used_bikes').select('*'),
+              supabase.from('affiliates').select('*')
+            ]);
+
+            if (newsResult.error) {
+              setSupaError(newsResult.error.message);
+            }
+
+            if (newsResult.data && newsResult.data.length > 0) {
+              setSupaDataCount(newsResult.data.length);
+              news = newsResult.data.map(n => ({
+                id: n.slug,
+                modelIds: n.model_ids,
+                title: n.title,
+                summary: n.summary,
+                content: n.content,
+                category: n.category,
+                image: n.image_url,
+                date: (() => {
+                  if (!n.date) return '';
+                  const [year, month, day] = n.date.split('T')[0].split('-').map(Number);
+                  return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
+                })()
+              }));
+            }
+
+            if (usedResult.data && usedResult.data.length > 0) {
+              usedResult.data.forEach(u => {
+                if (!usedBikesData[u.model_id]) usedBikesData[u.model_id] = [];
+                usedBikesData[u.model_id].push({
+                  title: u.title,
+                  price: u.price,
+                  location: u.location,
+                  url: u.external_url
+                });
+              });
+            }
+
+            if (affiliatesResult.data && affiliatesResult.data.length > 0) {
+              affiliatesResult.data.forEach(a => {
+                if (!affiliatesData[a.model_id]) affiliatesData[a.model_id] = [];
+                affiliatesData[a.model_id].push({
+                  name: a.name,
+                  price: a.price,
+                  image: a.image_url,
+                  url: a.affiliate_url,
+                  store: a.store_name
+                });
+              });
+            }
+          } catch (supaErr) {
+            setSupaError(supaErr instanceof Error ? supaErr.message : 'Unknown Supabase error');
+            console.warn("Supabase fetch failed, falling back to JSON:", supaErr);
+          }
         }
 
-        const base = await baseRes.json();
-        const news = await newsRes.json();
-        const usedBikesData = await usedBikesRes.json();
-        const affiliatesData = await affiliatesRes.json();
+        // 3. Fallback to JSON if Supabase data is empty or failed
+        if (news.length === 0) {
+          const newsRes = await fetch(`${normalizedBaseUrl}news.json`);
+          if (newsRes.ok) news = await newsRes.json();
+        }
+        
+        if (Object.keys(usedBikesData).length === 0) {
+          const usedBikesRes = await fetch(`${normalizedBaseUrl}used_bikes.json`);
+          if (usedBikesRes.ok) usedBikesData = await usedBikesRes.json();
+        }
 
-        // Merge data
+        if (Object.keys(affiliatesData).length === 0) {
+          const affiliatesRes = await fetch(`${normalizedBaseUrl}affiliates.json`);
+          if (affiliatesRes.ok) affiliatesData = await affiliatesRes.json();
+        }
+
+        // 4. Merge data
         const mergedModels = base.models.map((m: any) => ({
           ...m,
           news: news.filter((n: any) => n.modelIds?.includes(m.id)),
