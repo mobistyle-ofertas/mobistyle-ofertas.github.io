@@ -1982,11 +1982,44 @@ export default function App() {
     );
   }
 
+  const showDebug = import.meta.env.DEV || (typeof window !== 'undefined' && window.location.search.includes('debug=true'));
+
   return (
     <HelmetProvider>
       <Router basename={import.meta.env.BASE_URL}>
         <ScrollToTop />
         <div className="min-h-screen flex flex-col">
+          {showDebug && (
+            <div className="fixed bottom-4 right-4 z-[9999] bg-black/90 text-white p-4 rounded-xl text-[10px] font-mono max-w-xs border border-white/20 shadow-2xl backdrop-blur-md">
+              <div className="font-bold mb-2 border-b border-white/20 pb-1 flex justify-between items-center">
+                <span className="text-blue-400">SUPABASE DEBUG</span>
+                <button onClick={() => window.location.reload()} className="bg-white/10 px-2 py-0.5 rounded hover:bg-white/20 transition-colors">Reload</button>
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex justify-between">
+                  <span>URL:</span>
+                  <span className={import.meta.env.VITE_SUPABASE_URL ? 'text-green-400' : 'text-red-400'}>
+                    {import.meta.env.VITE_SUPABASE_URL ? 'OK' : 'MISSING'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>KEY:</span>
+                  <span className={import.meta.env.VITE_SUPABASE_ANON_KEY ? 'text-green-400' : 'text-red-400'}>
+                    {import.meta.env.VITE_SUPABASE_ANON_KEY ? 'OK' : 'MISSING'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>News Count:</span>
+                  <span className="text-blue-400">{supaDataCount} (Supa) / {data?.homeNews.length} (Home)</span>
+                </div>
+                {supaError && (
+                  <div className="mt-2 p-1.5 bg-red-500/10 rounded border border-red-500/20 text-red-400 break-words">
+                    Error: {supaError}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <Navbar data={data} />
           <main className="flex-grow">
             <Routes>
