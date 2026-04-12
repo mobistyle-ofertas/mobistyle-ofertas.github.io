@@ -1226,11 +1226,11 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
           <ShareButtons title={news.title} url={`/noticia/${news.id}`} />
         </div>
 
-        <div className="aspect-[21/9] rounded-2xl overflow-hidden mb-8 bg-zinc-50 border border-zinc-100">
+        <div className="rounded-2xl overflow-hidden mb-8 bg-zinc-50 border border-zinc-100">
           <img 
             src={news.image || `/images/news/${news.id}.jpg`} 
             alt={news.title} 
-            className="w-full h-full object-cover"
+            className="w-full h-auto block"
             referrerPolicy="no-referrer"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
