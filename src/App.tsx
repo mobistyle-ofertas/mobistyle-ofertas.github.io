@@ -1246,7 +1246,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
 
         <div className="prose prose-zinc prose-sm max-w-none mb-12">
           <ReactMarkdown>
-            {news.content || ''}
+            {(news.content || '').replace(/\\n/g, '\n')}
           </ReactMarkdown>
         </div>
 
