@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
-import { Bike, Cpu, Shield, ChevronRight, ExternalLink, MapPin, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy } from 'lucide-react';
+import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy } from 'lucide-react';
 
 // Custom Brand Icons (removed from recent lucide-react versions)
 const Instagram = (props: any) => (
@@ -59,8 +59,8 @@ interface NewsItem {
 
 interface UsedBike {
   title: string;
-  price: string;
-  location: string;
+  price: number;
+  image_url: string;
   url: string;
 }
 
@@ -675,32 +675,34 @@ const Home = ({ data }: { data: SiteData | null }) => {
         </div>
       </section>
 
-      <section>
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-display font-bold tracking-tight">Explorar ofertas em</h2>
-          <div className="h-px flex-grow mx-8 bg-zinc-200 hidden sm:block"></div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {nonEmptyCategories.map((cat) => (
-            <Link 
-              key={cat.id} 
-              to={`/category/${cat.id}`}
-              className="group bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm hover:border-zinc-900 transition-all flex flex-col items-start gap-6"
-            >
-              <div className="bg-zinc-100 p-4 rounded-xl group-hover:bg-zinc-900 group-hover:text-white transition-colors">
-                {getIcon(cat.icon)}
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2">{cat.name}</h3>
-                <p className="text-zinc-500 text-sm mb-4">{cat.description}</p>
-                <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                  Ver itens <ChevronRight className="w-3 h-3" />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      {nonEmptyCategories.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-display font-bold tracking-tight">Explorar ofertas em</h2>
+            <div className="h-px flex-grow mx-8 bg-zinc-200 hidden sm:block"></div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {nonEmptyCategories.map((cat) => (
+              <Link 
+                key={cat.id} 
+                to={`/category/${cat.id}`}
+                className="group bg-white p-8 rounded-2xl border border-zinc-200 shadow-sm hover:border-zinc-900 transition-all flex flex-col items-start gap-6"
+              >
+                <div className="bg-zinc-100 p-4 rounded-xl group-hover:bg-zinc-900 group-hover:text-white transition-colors">
+                  {getIcon(cat.icon)}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold mb-2">{cat.name}</h3>
+                  <p className="text-zinc-500 text-sm mb-4">{cat.description}</p>
+                  <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                    Ver itens <ChevronRight className="w-3 h-3" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </motion.div>
   );
 };
@@ -1660,24 +1662,40 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-display font-bold tracking-tight">Seminovas no Webmotors</h2>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {model.usedBikes.map((bike, i) => (
                   <a 
                     key={i} 
                     href={bike.url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="group bg-zinc-900 text-white p-4 rounded-xl hover:bg-zinc-800 transition-all"
+                    className="group bg-white border border-zinc-100 rounded-xl overflow-hidden hover:border-zinc-300 transition-all flex flex-col"
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-bold text-base leading-tight">{bike.title}</h3>
-                      <ExternalLink className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" />
+                    <div className="aspect-[4/3] overflow-hidden bg-zinc-50">
+                      <img 
+                        src={bike.image_url || '/images/logo.png'} 
+                        alt={bike.title} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          if (!target.src.includes('logo.png')) {
+                            target.src = '/images/logo.png';
+                            target.classList.add('invert', 'object-contain', 'p-8', 'bg-zinc-900');
+                          }
+                        }}
+                      />
                     </div>
-                    <div className="flex items-center justify-between mt-auto">
-                      <span className="text-xl font-display font-bold text-zinc-100">{bike.price}</span>
-                      <div className="flex items-center gap-1 text-[10px] text-zinc-400">
-                        <MapPin className="w-2.5 h-2.5" />
-                        {bike.location}
+                    <div className="p-3 flex flex-col flex-grow">
+                      <div className="flex justify-between items-start mb-1">
+                        <h3 className="font-bold text-[11px] leading-tight text-zinc-900 group-hover:text-zinc-700 transition-colors line-clamp-2 h-8">{bike.title}</h3>
+                        <ExternalLink className="w-3 h-3 text-zinc-300 group-hover:text-zinc-900 transition-colors flex-shrink-0 ml-1" />
+                      </div>
+                      
+                      <div className="mt-auto pt-2 border-t border-zinc-50 flex items-center justify-between">
+                        <span className="text-sm font-display font-bold text-zinc-900">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(bike.price)}
+                        </span>
                       </div>
                     </div>
                   </a>
@@ -1883,8 +1901,8 @@ export default function App() {
                 if (!usedBikesData[u.model_id]) usedBikesData[u.model_id] = [];
                 usedBikesData[u.model_id].push({
                   title: u.title,
-                  price: u.price,
-                  location: u.location,
+                  price: Number(u.price),
+                  image_url: u.image_url,
                   url: u.external_url
                 });
               });
