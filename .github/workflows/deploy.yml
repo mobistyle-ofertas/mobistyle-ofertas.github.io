@@ -31,13 +31,12 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_BASE: ${{ vars.VITE_BASE || '/' }}
+          VITE_BASE: /
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_INTENSE_DEBATE_ACCT: ${{ secrets.VITE_INTENSE_DEBATE_ACCT }}
           VITE_INTENSE_DEBATE_ID: ${{ secrets.VITE_INTENSE_DEBATE_ID }}
           VITE_INTENSE_DEBATE_KEY: ${{ secrets.VITE_INTENSE_DEBATE_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
