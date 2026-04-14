@@ -43,6 +43,22 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { supabase } from './lib/supabase';
 
+// Helper to get correct asset path considering BASE_URL
+const getAssetPath = (path: string) => {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  return `${normalizedBaseUrl}${cleanPath}`;
+};
+
+const getFullUrl = (path: string) => {
+  const assetPath = getAssetPath(path);
+  if (assetPath.startsWith('http')) return assetPath;
+  return `${window.location.origin}${assetPath}`;
+};
+
 // Types
 // ... (rest of types)
 interface NewsItem {
@@ -266,7 +282,7 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
             <Link to="/" className="flex items-center gap-2">
               <div className="bg-zinc-900 p-1 rounded-md overflow-hidden">
                 <img 
-                  src="/images/logo.png" 
+                  src={getAssetPath("/images/logo.png")} 
                   alt="MobiStyle Logo" 
                   className="w-5 h-5 object-contain"
                   referrerPolicy="no-referrer"
@@ -368,7 +384,7 @@ const Footer = ({ data }: { data: SiteData | null }) => (
           <div className="flex items-center gap-2 mb-4">
             <div className="bg-white p-1 rounded-md overflow-hidden">
               <img 
-                src="/images/logo.png" 
+                src={getAssetPath("/images/logo.png")} 
                 alt="MobiStyle Logo" 
                 className="w-5 h-5 object-contain invert"
                 referrerPolicy="no-referrer"
@@ -508,14 +524,14 @@ const Home = ({ data }: { data: SiteData | null }) => {
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content="MobiStyle | Home" />
         <meta property="og:description" content="MobiStyle Ofertas. Curadoria de mobilidade urbana e tecnologia." />
-        <meta property="og:image" content={`${window.location.origin}/images/news/sobre.png`} />
+        <meta property="og:image" content={getFullUrl("/images/news/sobre.png")} />
 
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content={canonicalUrl} />
         <meta property="twitter:title" content="MobiStyle | Home" />
         <meta property="twitter:description" content="MobiStyle Ofertas. Curadoria de mobilidade urbana e tecnologia." />
-        <meta property="twitter:image" content={`${window.location.origin}/images/news/sobre.png`} />
+        <meta property="twitter:image" content={getFullUrl("/images/news/sobre.png")} />
       </Helmet>
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
@@ -541,14 +557,14 @@ const Home = ({ data }: { data: SiteData | null }) => {
               >
                 <Link to={`/noticia/${news.id}`} className="block w-full h-full">
                   <img 
-                    src={news.image || `/images/news/${news.id}.jpg`} 
+                    src={getAssetPath(news.image || `/images/news/${news.id}.jpg`)} 
                     alt={news.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     referrerPolicy="no-referrer"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       if (!target.src.includes('logo.png')) {
-                        target.src = '/images/logo.png';
+                        target.src = getAssetPath('/images/logo.png');
                         target.classList.add('invert', 'object-contain', 'p-12', 'bg-zinc-900');
                       }
                     }}
@@ -616,14 +632,14 @@ const Home = ({ data }: { data: SiteData | null }) => {
                 <Link to={`/noticia/${news.id}`} className="flex sm:block items-center">
                   <div className="w-24 h-24 sm:w-full sm:aspect-[16/9] overflow-hidden bg-zinc-50 flex-shrink-0">
                     <img 
-                      src={news.image || `/images/news/${news.id}.jpg`} 
+                      src={getAssetPath(news.image || `/images/news/${news.id}.jpg`)} 
                       alt={news.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         if (!target.src.includes('logo.png')) {
-                          target.src = '/images/logo.png';
+                          target.src = getAssetPath('/images/logo.png');
                           target.classList.add('invert', 'object-contain', 'p-8', 'bg-zinc-100');
                         }
                       }}
@@ -748,14 +764,14 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={`${category.name} | MobiStyle`} />
         <meta property="og:description" content={category.description} />
-        <meta property="og:image" content={`${window.location.origin}/images/news/sobre.png`} />
+        <meta property="og:image" content={getFullUrl("/images/news/sobre.png")} />
 
         {/* Twitter */}
         <meta property="twitter:card" content="summary" />
         <meta property="twitter:url" content={canonicalUrl} />
         <meta property="twitter:title" content={`${category.name} | MobiStyle`} />
         <meta property="twitter:description" content={category.description} />
-        <meta property="twitter:image" content={`${window.location.origin}/images/news/sobre.png`} />
+        <meta property="twitter:image" content={getFullUrl("/images/news/sobre.png")} />
       </Helmet>
       <div className="mb-8">
         <div className="flex items-center gap-3 text-[10px] text-zinc-400 mb-3 uppercase tracking-widest font-bold">
@@ -812,7 +828,7 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
           >
             <div className={`${isMenuMode ? 'aspect-square rounded-lg' : 'aspect-[4/3]'} bg-zinc-50 flex items-center justify-center overflow-hidden`}>
               <img 
-                src={model.image || `/images/models/${model.id}.jpg`} 
+                src={getAssetPath(model.image || `/images/models/${model.id}.jpg`)} 
                 alt={model.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 referrerPolicy="no-referrer"
@@ -911,14 +927,14 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={`${pageTitle} | MobiStyle`} />
         <meta property="og:description" content={pageDesc} />
-        <meta property="og:image" content={`${window.location.origin}/images/news/sobre.png`} />
+        <meta property="og:image" content={getFullUrl("/images/news/sobre.png")} />
 
         {/* Twitter */}
         <meta property="twitter:card" content="summary" />
         <meta property="twitter:url" content={canonicalUrl} />
         <meta property="twitter:title" content={`${pageTitle} | MobiStyle`} />
         <meta property="twitter:description" content={pageDesc} />
-        <meta property="twitter:image" content={`${window.location.origin}/images/news/sobre.png`} />
+        <meta property="twitter:image" content={getFullUrl("/images/news/sobre.png")} />
       </Helmet>
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
         <div>
@@ -966,14 +982,14 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
             <Link to={`/noticia/${news.id}`} className="block h-full">
               <div className="aspect-[16/9] overflow-hidden bg-zinc-50">
                 <img 
-                  src={news.image || `/images/news/${news.id}.jpg`} 
+                  src={getAssetPath(news.image || `/images/news/${news.id}.jpg`)} 
                   alt={news.title} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!target.src.includes('logo.png')) {
-                      target.src = '/images/logo.png';
+                      target.src = getAssetPath('/images/logo.png');
                       target.classList.add('invert', 'object-contain', 'p-8', 'bg-zinc-100');
                     }
                   }}
@@ -1164,7 +1180,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
 
   const location = useLocation();
   const canonicalUrl = window.location.origin + location.pathname;
-  const newsImage = news.image?.startsWith('http') ? news.image : `${window.location.origin}${news.image || `/images/news/${news.id}.jpg`}`;
+  const newsImage = news.image?.startsWith('http') ? news.image : getFullUrl(news.image || `/images/news/${news.id}.jpg`);
 
   return (
     <motion.div 
@@ -1230,14 +1246,14 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
 
         <div className="rounded-2xl overflow-hidden mb-8 bg-zinc-50 border border-zinc-100">
           <img 
-            src={news.image || `/images/news/${news.id}.jpg`} 
+            src={getAssetPath(news.image || `/images/news/${news.id}.jpg`)} 
             alt={news.title} 
             className="w-full h-auto block"
             referrerPolicy="no-referrer"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               if (!target.src.includes('logo.png')) {
-                target.src = '/images/logo.png';
+                target.src = getAssetPath('/images/logo.png');
                 target.classList.add('invert', 'object-contain', 'p-16', 'bg-zinc-50');
               }
             }}
@@ -1268,7 +1284,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
               >
                 <div className="w-16 h-16 bg-zinc-50 rounded-lg overflow-hidden flex-shrink-0">
                   <img 
-                    src={model.image || `/images/models/${model.id}.jpg`} 
+                    src={getAssetPath(model.image || `/images/models/${model.id}.jpg`)} 
                     alt={model.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     referrerPolicy="no-referrer"
@@ -1340,14 +1356,14 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                 <Link to={`/noticia/${n.id}`}>
                   <div className="aspect-[16/9] overflow-hidden bg-zinc-50">
                     <img 
-                      src={n.image || `/images/news/${n.id}.jpg`} 
+                      src={getAssetPath(n.image || `/images/news/${n.id}.jpg`)} 
                       alt={n.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         if (!target.src.includes('logo.png')) {
-                          target.src = '/images/logo.png';
+                          target.src = getAssetPath('/images/logo.png');
                           target.classList.add('invert', 'object-contain', 'p-6', 'bg-zinc-50');
                         }
                       }}
@@ -1422,7 +1438,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
 
   const location = useLocation();
   const canonicalUrl = window.location.origin + location.pathname;
-  const modelImage = model.image?.startsWith('http') ? model.image : `${window.location.origin}${model.image || `/images/models/${model.id}.jpg`}`;
+  const modelImage = model.image?.startsWith('http') ? model.image : getFullUrl(model.image || `/images/models/${model.id}.jpg`);
 
   if (!isMotoOrScooter) {
     return (
@@ -1673,14 +1689,14 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                   >
                     <div className="aspect-[4/3] overflow-hidden bg-zinc-50">
                       <img 
-                        src={bike.image_url || '/images/logo.png'} 
+                        src={getAssetPath(bike.image_url || '/images/logo.png')} 
                         alt={bike.title} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         referrerPolicy="no-referrer"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           if (!target.src.includes('logo.png')) {
-                            target.src = '/images/logo.png';
+                            target.src = getAssetPath('/images/logo.png');
                             target.classList.add('invert', 'object-contain', 'p-8', 'bg-zinc-900');
                           }
                         }}
