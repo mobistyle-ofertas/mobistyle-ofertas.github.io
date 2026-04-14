@@ -48,18 +48,14 @@ const getAssetPath = (path: string) => {
   if (!path) return '';
   if (path.startsWith('http') || path.startsWith('data:')) return path;
   
-  const baseUrl = import.meta.env.BASE_URL || '/';
-  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  // Remove leading slash and 'public/' prefix
+  const cleanPath = path.replace(/^\//, '').replace(/^public\//, '');
   
-  // Remove leading slash
-  let cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  // Vite's BASE_URL is the most reliable source of truth
+  const base = import.meta.env.BASE_URL || '/';
+  const prefix = base.endsWith('/') ? base : `${base}/`;
   
-  // If the path already starts with public/, remove it because Vite serves public folder from root
-  if (cleanPath.startsWith('public/')) {
-    cleanPath = cleanPath.replace('public/', '');
-  }
-  
-  return `${normalizedBaseUrl}${cleanPath}`;
+  return `${prefix}${cleanPath}`;
 };
 
 const getFullUrl = (path: string) => {
@@ -291,7 +287,7 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
             <Link to="/" className="flex items-center gap-2">
               <div className="bg-zinc-900 p-1 rounded-md overflow-hidden">
                 <img 
-                  src={getAssetPath('images/logo.png')} 
+                  src="https://mobistyle-ofertas.github.io/images/logo.png" 
                   alt="MobiStyle Logo" 
                   className="w-5 h-5 object-contain"
                   referrerPolicy="no-referrer"
@@ -393,7 +389,7 @@ const Footer = ({ data }: { data: SiteData | null }) => (
           <div className="flex items-center gap-2 mb-4">
             <div className="bg-white p-1 rounded-md overflow-hidden">
               <img 
-                src={getAssetPath('images/logo.png')} 
+                src="https://mobistyle-ofertas.github.io/images/logo.png" 
                 alt="MobiStyle Logo" 
                 className="w-5 h-5 object-contain invert"
                 referrerPolicy="no-referrer"
@@ -573,8 +569,10 @@ const Home = ({ data }: { data: SiteData | null }) => {
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       if (!target.src.includes('logo.png')) {
-                        target.src = getAssetPath('public/images/logo.png');
+                        target.src = getAssetPath('images/logo.png');
                         target.classList.add('invert', 'opacity-10', 'object-contain', 'p-12', 'bg-zinc-100');
+                      } else {
+                        target.src = 'https://picsum.photos/seed/mobi/200/200';
                       }
                     }}
                   />
@@ -641,15 +639,17 @@ const Home = ({ data }: { data: SiteData | null }) => {
                 <Link to={`/noticia/${news.id}`} className="flex sm:block items-center">
                   <div className="w-24 h-24 sm:w-full sm:aspect-[16/9] overflow-hidden bg-zinc-50 flex-shrink-0">
                     <img 
-                      src={getAssetPath(news.image || `/public/images/news/${news.id}.jpg`)} 
+                      src={getAssetPath(news.image || `images/news/${news.id}.jpg`)} 
                       alt={news.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         if (!target.src.includes('logo.png')) {
-                          target.src = getAssetPath('public/images/logo.png');
+                          target.src = getAssetPath('images/logo.png');
                           target.classList.add('invert', 'opacity-10', 'object-contain', 'p-8', 'bg-zinc-100');
+                        } else {
+                          target.src = 'https://picsum.photos/seed/mobi/200/200';
                         }
                       }}
                     />
@@ -837,15 +837,17 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
           >
             <div className={`${isMenuMode ? 'aspect-square rounded-lg' : 'aspect-[4/3]'} bg-zinc-50 flex items-center justify-center overflow-hidden`}>
               <img 
-                src={getAssetPath(model.image || `/public/images/models/${model.id}.jpg`)} 
+                src={getAssetPath(model.image || `images/models/${model.id}.jpg`)} 
                 alt={model.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   if (!target.src.includes('logo.png')) {
-                    target.src = getAssetPath('public/images/logo.png');
+                    target.src = getAssetPath('images/logo.png');
                     target.classList.add('invert', 'opacity-10', 'object-contain', 'p-8', 'bg-zinc-100');
+                  } else {
+                    target.src = 'https://picsum.photos/seed/mobi/200/200';
                   }
                 }}
               />
@@ -998,15 +1000,17 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
             <Link to={`/noticia/${news.id}`} className="block h-full">
               <div className="aspect-[16/9] overflow-hidden bg-zinc-50">
                 <img 
-                  src={getAssetPath(news.image || `/public/images/news/${news.id}.jpg`)} 
+                  src={getAssetPath(news.image || `images/news/${news.id}.jpg`)} 
                   alt={news.title} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!target.src.includes('logo.png')) {
-                      target.src = getAssetPath('public/images/logo.png');
+                      target.src = getAssetPath('images/logo.png');
                       target.classList.add('invert', 'opacity-10', 'object-contain', 'p-8', 'bg-zinc-100');
+                    } else {
+                      target.src = 'https://picsum.photos/seed/mobi/200/200';
                     }
                   }}
                 />
@@ -1262,15 +1266,17 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
 
         <div className="rounded-2xl overflow-hidden mb-8 bg-zinc-50 border border-zinc-100">
           <img 
-            src={getAssetPath(news.image || `/public/images/news/${news.id}.jpg`)} 
+            src={getAssetPath(news.image || `images/news/${news.id}.jpg`)} 
             alt={news.title} 
             className="w-full h-auto block"
             referrerPolicy="no-referrer"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               if (!target.src.includes('logo.png')) {
-                target.src = getAssetPath('public/images/logo.png');
+                target.src = getAssetPath('images/logo.png');
                 target.classList.add('invert', 'opacity-10', 'object-contain', 'p-16', 'bg-zinc-100');
+              } else {
+                target.src = 'https://picsum.photos/seed/mobi/200/200';
               }
             }}
           />
@@ -1300,15 +1306,17 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
               >
                 <div className="w-16 h-16 bg-zinc-50 rounded-lg overflow-hidden flex-shrink-0">
                   <img 
-                    src={getAssetPath(model.image || `/public/images/models/${model.id}.jpg`)} 
+                    src={getAssetPath(model.image || `images/models/${model.id}.jpg`)} 
                     alt={model.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     referrerPolicy="no-referrer"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       if (!target.src.includes('logo.png')) {
-                        target.src = getAssetPath('public/images/logo.png');
+                        target.src = getAssetPath('images/logo.png');
                         target.classList.add('invert', 'opacity-10', 'object-contain', 'p-8', 'bg-zinc-100');
+                      } else {
+                        target.src = 'https://picsum.photos/seed/mobi/200/200';
                       }
                     }}
                   />
@@ -1386,15 +1394,17 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                 <Link to={`/noticia/${n.id}`}>
                   <div className="aspect-[16/9] overflow-hidden bg-zinc-50">
                     <img 
-                      src={getAssetPath(n.image || `/public/images/news/${n.id}.jpg`)} 
+                      src={getAssetPath(n.image || `images/news/${n.id}.jpg`)} 
                       alt={n.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         if (!target.src.includes('logo.png')) {
-                          target.src = getAssetPath('public/images/logo.png');
+                          target.src = getAssetPath('images/logo.png');
                           target.classList.add('invert', 'opacity-10', 'object-contain', 'p-8', 'bg-zinc-100');
+                        } else {
+                          target.src = 'https://picsum.photos/seed/mobi/200/200';
                         }
                       }}
                     />
@@ -1540,8 +1550,10 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       if (!target.src.includes('logo.png')) {
-                        target.src = getAssetPath('public/images/logo.png');
+                        target.src = getAssetPath('images/logo.png');
                         target.classList.add('invert', 'opacity-10', 'object-contain', 'p-8', 'bg-zinc-100');
+                      } else {
+                        target.src = 'https://picsum.photos/seed/mobi/200/200';
                       }
                     }}
                   />
@@ -1679,8 +1691,10 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   if (!target.src.includes('logo.png')) {
-                    target.src = getAssetPath('public/images/logo.png');
+                    target.src = getAssetPath('images/logo.png');
                     target.classList.add('invert', 'opacity-10', 'object-contain', 'p-8', 'bg-zinc-100');
+                  } else {
+                    target.src = 'https://picsum.photos/seed/mobi/200/200';
                   }
                 }}
               />
@@ -1740,15 +1754,17 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                   >
                     <div className="aspect-[4/3] overflow-hidden bg-zinc-50">
                       <img 
-                        src={getAssetPath(bike.image_url || 'public/images/logo.png')} 
+                        src={getAssetPath(bike.image_url || 'images/logo.png')} 
                         alt={bike.title} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         referrerPolicy="no-referrer"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           if (!target.src.includes('logo.png')) {
-                            target.src = getAssetPath('public/images/logo.png');
+                            target.src = getAssetPath('images/logo.png');
                             target.classList.add('invert', 'opacity-10', 'object-contain', 'p-8', 'bg-zinc-100');
+                          } else {
+                            target.src = 'https://picsum.photos/seed/mobi/200/200';
                           }
                         }}
                       />
