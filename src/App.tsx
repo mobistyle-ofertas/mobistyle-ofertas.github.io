@@ -47,11 +47,17 @@ import { supabase } from './lib/supabase';
 const getAssetPath = (path: string) => {
   if (!path) return '';
   if (path.startsWith('http') || path.startsWith('data:')) return path;
+  
   const baseUrl = import.meta.env.BASE_URL || '/';
   const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
   
   // Remove leading slash
   let cleanPath = path.startsWith('/') ? path.slice(1) : path;
+  
+  // Ensure public/ prefix for local assets if not present
+  if (!cleanPath.startsWith('public/') && !cleanPath.startsWith('assets/')) {
+    cleanPath = `public/${cleanPath}`;
+  }
   
   return `${normalizedBaseUrl}${cleanPath}`;
 };
@@ -285,7 +291,7 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
             <Link to="/" className="flex items-center gap-2">
               <div className="bg-zinc-900 p-1 rounded-md overflow-hidden">
                 <img 
-                  src={getAssetPath('public/images/logo.png')} 
+                  src={getAssetPath('images/logo.png')} 
                   alt="MobiStyle Logo" 
                   className="w-5 h-5 object-contain"
                   referrerPolicy="no-referrer"
@@ -387,7 +393,7 @@ const Footer = ({ data }: { data: SiteData | null }) => (
           <div className="flex items-center gap-2 mb-4">
             <div className="bg-white p-1 rounded-md overflow-hidden">
               <img 
-                src={getAssetPath('public/images/logo.png')} 
+                src={getAssetPath('images/logo.png')} 
                 alt="MobiStyle Logo" 
                 className="w-5 h-5 object-contain invert"
                 referrerPolicy="no-referrer"
