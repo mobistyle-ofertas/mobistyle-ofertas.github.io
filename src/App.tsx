@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
 import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy } from 'lucide-react';
 
 // Custom Brand Icons (removed from recent lucide-react versions)
@@ -51,11 +51,8 @@ const getAssetPath = (path: string) => {
   // Remove leading slash and 'public/' prefix
   const cleanPath = path.replace(/^\//, '').replace(/^public\//, '');
   
-  // Vite's BASE_URL is the most reliable source of truth
-  const base = import.meta.env.BASE_URL || '/';
-  const prefix = base.endsWith('/') ? base : `${base}/`;
-  
-  return `${prefix}${cleanPath}`;
+  // Return relative path. With HashRouter, this is always relative to index.html
+  return cleanPath;
 };
 
 const getFullUrl = (path: string) => {
@@ -287,7 +284,7 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
             <Link to="/" className="flex items-center gap-2">
               <div className="bg-zinc-900 p-1 rounded-md overflow-hidden">
                 <img 
-                  src="https://mobistyle-ofertas.github.io/images/logo.png" 
+                  src={getAssetPath('images/logo.png')} 
                   alt="MobiStyle Logo" 
                   className="w-5 h-5 object-contain"
                   referrerPolicy="no-referrer"
@@ -389,7 +386,7 @@ const Footer = ({ data }: { data: SiteData | null }) => (
           <div className="flex items-center gap-2 mb-4">
             <div className="bg-white p-1 rounded-md overflow-hidden">
               <img 
-                src="https://mobistyle-ofertas.github.io/images/logo.png" 
+                src={getAssetPath('images/logo.png')} 
                 alt="MobiStyle Logo" 
                 className="w-5 h-5 object-contain invert"
                 referrerPolicy="no-referrer"
@@ -2099,7 +2096,7 @@ export default function App() {
 
   return (
     <HelmetProvider>
-      <Router basename={import.meta.env.BASE_URL}>
+      <Router>
         <ScrollToTop />
         <div className="min-h-screen flex flex-col">
           <Navbar data={data} />
