@@ -54,9 +54,9 @@ const getAssetPath = (path: string) => {
   // Remove leading slash
   let cleanPath = path.startsWith('/') ? path.slice(1) : path;
   
-  // Ensure public/ prefix for local assets if not present
-  if (!cleanPath.startsWith('public/') && !cleanPath.startsWith('assets/')) {
-    cleanPath = `public/${cleanPath}`;
+  // If the path already starts with public/, remove it because Vite serves public folder from root
+  if (cleanPath.startsWith('public/')) {
+    cleanPath = cleanPath.replace('public/', '');
   }
   
   return `${normalizedBaseUrl}${cleanPath}`;
