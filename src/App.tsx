@@ -563,9 +563,8 @@ const Home = ({ data }: { data: SiteData | null }) => {
                     referrerPolicy="no-referrer"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      if (!target.src.includes('logo.png')) {
-                        target.src = getAssetPath('/images/logo.png');
-                        target.classList.add('invert', 'object-contain', 'p-12', 'bg-zinc-900');
+                      if (!target.src.includes('images.unsplash.com')) {
+                        target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
                       }
                     }}
                   />
@@ -638,9 +637,8 @@ const Home = ({ data }: { data: SiteData | null }) => {
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        if (!target.src.includes('logo.png')) {
-                          target.src = getAssetPath('/images/logo.png');
-                          target.classList.add('invert', 'object-contain', 'p-8', 'bg-zinc-100');
+                        if (!target.src.includes('images.unsplash.com')) {
+                          target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
                         }
                       }}
                     />
@@ -832,6 +830,12 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
                 alt={model.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (!target.src.includes('images.unsplash.com')) {
+                    target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
+                  }
+                }}
               />
             </div>
             <div className={isMenuMode ? "p-2 text-center" : "p-4"}>
@@ -988,9 +992,8 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    if (!target.src.includes('logo.png')) {
-                      target.src = getAssetPath('/images/logo.png');
-                      target.classList.add('invert', 'object-contain', 'p-8', 'bg-zinc-100');
+                    if (!target.src.includes('images.unsplash.com')) {
+                      target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
                     }
                   }}
                 />
@@ -1252,9 +1255,8 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
             referrerPolicy="no-referrer"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              if (!target.src.includes('logo.png')) {
-                target.src = getAssetPath('/images/logo.png');
-                target.classList.add('invert', 'object-contain', 'p-16', 'bg-zinc-50');
+              if (!target.src.includes('images.unsplash.com')) {
+                target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
               }
             }}
           />
@@ -1288,6 +1290,12 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                     alt={model.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (!target.src.includes('images.unsplash.com')) {
+                        target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
+                      }
+                    }}
                   />
                 </div>
                 <div>
@@ -1316,10 +1324,16 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
               >
                 <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
                   <img 
-                    src={offer.image} 
+                    src={getAssetPath(offer.image)} 
                     alt={offer.name} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (!target.src.includes('images.unsplash.com')) {
+                        target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
+                      }
+                    }}
                   />
                 </div>
                 <div className="flex-grow">
@@ -1362,9 +1376,8 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                       referrerPolicy="no-referrer"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        if (!target.src.includes('logo.png')) {
-                          target.src = getAssetPath('/images/logo.png');
-                          target.classList.add('invert', 'object-contain', 'p-6', 'bg-zinc-50');
+                        if (!target.src.includes('images.unsplash.com')) {
+                          target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
                         }
                       }}
                     />
@@ -1503,10 +1516,16 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
               >
                 <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
                   <img 
-                    src={item.image} 
+                    src={getAssetPath(item.image)} 
                     alt={item.name} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (!target.src.includes('images.unsplash.com')) {
+                        target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
+                      }
+                    }}
                   />
                 </div>
                 <div className="flex-grow space-y-1">
@@ -1546,10 +1565,16 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                 >
                   <div className="aspect-square rounded-xl overflow-hidden mb-4 bg-zinc-50">
                     <img 
-                      src={offer.image} 
+                      src={getAssetPath(offer.image)} 
                       alt={offer.name} 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (!target.src.includes('images.unsplash.com')) {
+                          target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
+                        }
+                      }}
                     />
                   </div>
                   <div className="flex-grow">
@@ -1628,10 +1653,16 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
               className="aspect-[4/3] -mx-4 sm:-mx-6 md:mx-0 rounded-none md:rounded-2xl overflow-hidden bg-zinc-50 border border-zinc-100"
             >
               <img 
-                src={model.image} 
+                src={getAssetPath(model.image)} 
                 alt={model.name} 
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (!target.src.includes('images.unsplash.com')) {
+                    target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
+                  }
+                }}
               />
             </motion.div>
           )}
@@ -1695,9 +1726,8 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                         referrerPolicy="no-referrer"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          if (!target.src.includes('logo.png')) {
-                            target.src = getAssetPath('/images/logo.png');
-                            target.classList.add('invert', 'object-contain', 'p-8', 'bg-zinc-900');
+                          if (!target.src.includes('images.unsplash.com')) {
+                            target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
                           }
                         }}
                       />
@@ -1735,10 +1765,16 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                 >
                   <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
                     <img 
-                      src={item.image} 
+                      src={getAssetPath(item.image)} 
                       alt={item.name} 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (!target.src.includes('images.unsplash.com')) {
+                          target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
+                        }
+                      }}
                     />
                   </div>
                   <div className="flex-grow space-y-1">
@@ -1835,10 +1871,16 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
               >
                 <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
                   <img 
-                    src={offer.image} 
+                    src={getAssetPath(offer.image)} 
                     alt={offer.name} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (!target.src.includes('images.unsplash.com')) {
+                        target.src = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?q=80&w=800&auto=format&fit=crop';
+                      }
+                    }}
                   />
                 </div>
                 <div className="flex-grow">
