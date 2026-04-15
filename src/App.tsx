@@ -1245,7 +1245,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
           />
         </div>
 
-        <div className="prose prose-zinc prose-sm max-w-none mb-12">
+        <div className="prose prose-zinc prose-base md:prose-lg max-w-none mb-12">
           <ReactMarkdown>
             {(news.content || '').replace(/\\n/g, '\n')}
           </ReactMarkdown>
@@ -1375,7 +1375,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
 
 const ModelPage = ({ data }: { data: SiteData | null }) => {
   const { modelId } = useParams();
-  const [newsLimit, setNewsLimit] = useState(5);
+  const [newsLimit, setNewsLimit] = useState(3);
   if (!data) return null;
 
   const model = data.models.find(m => m.id === modelId);
@@ -1653,66 +1653,147 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-12">
-          {/* 1. Seminovas no Webmotors */}
-          {model.usedBikes.length > 0 && (
-            <section>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-display font-bold tracking-tight">Seminovas no Webmotors</h2>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {model.usedBikes.map((bike, i) => (
-                  <a 
-                    key={i} 
-                    href={bike.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="group bg-white border border-zinc-100 rounded-xl overflow-hidden hover:border-zinc-300 transition-all flex flex-col"
-                  >
-                    <div className="aspect-[4/3] overflow-hidden bg-zinc-50">
-                      <img 
-                        src={bike.image_url || 'https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/logo.png'} 
-                        alt={bike.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          if (!target.src.includes('logo.png')) {
-                            target.src = 'https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/logo.png';
-                            target.classList.add('invert', 'object-contain', 'p-8', 'bg-zinc-900');
-                          }
-                        }}
-                      />
-                    </div>
-                    <div className="p-3 flex flex-col flex-grow">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-bold text-[11px] leading-tight text-zinc-900 group-hover:text-zinc-700 transition-colors line-clamp-2 h-8">{bike.title}</h3>
-                        <ExternalLink className="w-3 h-3 text-zinc-300 group-hover:text-zinc-900 transition-colors flex-shrink-0 ml-1" />
+        {/* Meio: Seminovas (Esquerda) e Notícias (Direita) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-12 pt-8 border-t border-zinc-100">
+          
+          {/* Coluna Esquerda: Seminovas (2/3) */}
+          <div className="lg:col-span-2 space-y-8">
+            {model.usedBikes.length > 0 && (
+              <section>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-display font-bold tracking-tight">Seminovas no Webmotors</h2>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {model.usedBikes.map((bike, i) => (
+                    <a 
+                      key={i} 
+                      href={bike.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="group bg-white border border-zinc-100 rounded-lg overflow-hidden hover:border-zinc-300 transition-all flex flex-col"
+                    >
+                      <div className="aspect-[4/3] overflow-hidden bg-zinc-50">
+                        <img 
+                          src={bike.image_url || 'https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/logo.png'} 
+                          alt={bike.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (!target.src.includes('logo.png')) {
+                              target.src = 'https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/logo.png';
+                              target.classList.add('invert', 'object-contain', 'p-6', 'bg-zinc-900');
+                            }
+                          }}
+                        />
                       </div>
-                      
-                      <div className="mt-auto pt-2 border-t border-zinc-50 flex items-center justify-between">
-                        <span className="text-sm font-display font-bold text-zinc-900">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(bike.price)}
-                        </span>
+                      <div className="p-2 flex flex-col flex-grow">
+                        <div className="flex justify-between items-start mb-1">
+                          <h3 className="font-bold text-[10px] leading-tight text-zinc-900 group-hover:text-zinc-700 transition-colors line-clamp-2 h-7">{bike.title}</h3>
+                          <ExternalLink className="w-2.5 h-2.5 text-zinc-300 group-hover:text-zinc-900 transition-colors flex-shrink-0 ml-1" />
+                        </div>
+                        
+                        <div className="mt-auto pt-1.5 border-t border-zinc-50 flex items-center justify-between">
+                          <span className="text-xs font-display font-bold text-zinc-900">
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(bike.price)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </section>
-          )}
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
 
-          {/* 3. Melhores Ofertas & Acessórios */}
-          <section>
+          {/* Coluna Direita: Notícias & Reviews (Vertical - 1/3) */}
+          <div className="lg:col-span-1 space-y-8">
+            {visibleNews.length > 0 && (
+              <section>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-display font-bold tracking-tight">Notícias & Reviews</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                  {visibleNews.map((n, i) => (
+                    <Link 
+                      key={i} 
+                      to={`/noticia/${n.id}`}
+                      className="group bg-white rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col overflow-hidden"
+                    >
+                      <div className="aspect-[16/9] overflow-hidden bg-zinc-50">
+                        <img 
+                          src={n.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${n.id}.jpg`} 
+                          alt={n.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            if (!target.src.includes('logo.png')) {
+                              target.src = 'https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/logo.png';
+                              target.classList.add('invert', 'object-contain', 'p-6', 'bg-zinc-100');
+                            }
+                          }}
+                        />
+                      </div>
+                      <div className="p-3 flex flex-col flex-grow">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[9px] text-zinc-400 group-hover:text-zinc-900 uppercase font-bold tracking-wider transition-colors">
+                            {n.category}
+                          </span>
+                          <span className="text-[9px] text-zinc-300 uppercase font-bold">{n.date}</span>
+                        </div>
+                        <h3 className="text-xs font-bold mb-2 line-clamp-2 leading-snug group-hover:text-zinc-700 transition-colors">{n.title}</h3>
+                        <div className="flex items-center justify-between mt-auto pt-3 border-t border-zinc-50">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold hover:underline">
+                            Ler mais <ChevronRight className="w-2.5 h-2.5" />
+                          </span>
+                          <button 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (navigator.share) {
+                                navigator.share({
+                                  title: n.title,
+                                  url: window.location.origin + `/noticia/${n.id}`
+                                });
+                              } else {
+                                navigator.clipboard.writeText(window.location.origin + `/noticia/${n.id}`);
+                                alert('Link copiado para a área de transferência!');
+                              }
+                            }}
+                            className="p-1.5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors"
+                            title="Compartilhar"
+                          >
+                            <Share2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                  {model.news.length > newsLimit && (
+                    <button 
+                      onClick={() => setNewsLimit(prev => prev + 5)}
+                      className="w-full py-2.5 bg-zinc-50 rounded-xl font-bold text-[10px] text-zinc-500 hover:bg-zinc-100 transition-colors uppercase tracking-widest"
+                    >
+                      Ver mais notícias
+                    </button>
+                  )}
+                </div>
+              </section>
+            )}
+          </div>
+        </div>
+
+        {/* Fim: Melhores Ofertas & Acessórios (Grade Maior) */}
+        {model.affiliates.length > 0 && (
+          <section className="mt-12 pt-8 border-t border-zinc-100">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-display font-bold tracking-tight flex items-center gap-2">
-                <Tag className="w-5 h-5 text-zinc-900" /> Melhores Ofertas & Acessórios
+              <h2 className="text-2xl font-display font-bold tracking-tight flex items-center gap-2">
+                <Tag className="w-6 h-6 text-zinc-900" /> Melhores Ofertas & Acessórios
               </h2>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               {model.affiliates.map((item, i) => (
                 <motion.div 
                   key={i} 
@@ -1745,64 +1826,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
               ))}
             </div>
           </section>
-        </div>
-
-        {/* Sidebar - News & Reviews */}
-        <div className="space-y-8">
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-display font-bold tracking-tight">Notícias & Reviews</h2>
-            </div>
-            <div className="space-y-3">
-              {visibleNews.map((n, i) => (
-                <div key={i} className="bg-white p-4 rounded-xl border border-zinc-100 hover:border-zinc-200 transition-colors">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <Link 
-                      to={`/noticias?category=${encodeURIComponent(n.category || '')}`}
-                      className="text-[9px] text-zinc-400 hover:text-zinc-900 uppercase font-bold tracking-wider"
-                    >
-                      {n.category}
-                    </Link>
-                    <span className="text-[9px] text-zinc-300 uppercase font-bold">{n.date}</span>
-                  </div>
-                  <h3 className="text-xs font-bold mb-2 line-clamp-2 leading-snug">{n.title}</h3>
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-50">
-                    <Link to={`/noticia/${n.id}`} className="inline-flex items-center gap-1 text-[10px] font-bold hover:underline">
-                      Ler mais <ChevronRight className="w-2.5 h-2.5" />
-                    </Link>
-                    <button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (navigator.share) {
-                          navigator.share({
-                            title: n.title,
-                            url: window.location.origin + `/noticia/${n.id}`
-                          });
-                        } else {
-                          navigator.clipboard.writeText(window.location.origin + `/noticia/${n.id}`);
-                          alert('Link copiado para a área de transferência!');
-                        }
-                      }}
-                      className="p-1.5 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors"
-                      title="Compartilhar"
-                    >
-                      <Share2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {model.news.length > newsLimit && (
-                <button 
-                  onClick={() => setNewsLimit(prev => prev + 5)}
-                  className="w-full py-2.5 bg-zinc-50 rounded-xl font-bold text-[10px] text-zinc-500 hover:bg-zinc-100 transition-colors uppercase tracking-widest"
-                >
-                  Ver mais notícias
-                </button>
-              )}
-            </div>
-          </section>
-        </div>
-      </div>
+        )}
 
       {randomCategoryOffers && randomCategoryOffers.offers.length > 0 && (
         <div className="mt-16 pt-8 border-t border-zinc-100">
@@ -1839,6 +1863,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
           </div>
         </div>
       )}
+      </div>
     </motion.div>
   );
 };
