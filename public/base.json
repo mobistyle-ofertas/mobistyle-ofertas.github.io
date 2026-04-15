@@ -27,7 +27,7 @@
     }
   ],
   "models": [
-    { "id": "honda-pcx-160", "categoryId": "motos-scooters", "brand": "Honda", "name": "Honda PCX 160", "description": "Scooter urbana premium com tecnologia e economia.", "image": "/https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle//models/honda-pcx-160.jpg" },
+    { "id": "honda-pcx-160", "categoryId": "motos-scooters", "brand": "Honda", "name": "Honda PCX 160", "description": "Scooter urbana premium com tecnologia e economia.", "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle//models/honda-pcx-160.jpg" },
     { "id": "honda-adv-160", "categoryId": "motos-scooters", "brand": "Honda", "name": "Honda ADV 160", "description": "Scooter aventureira para a cidade e além.", "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/honda-adv-160.jpg" },
     { "id": "yamaha-aerox-160", "categoryId": "motos-scooters", "brand": "Yamaha", "name": "Yamaha Aerox 160", "description": "Performance esportiva em formato de scooter.", "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/yamaha-aerox-160.jpg" },
     { "id": "yamaha-nmax-160", "categoryId": "motos-scooters", "brand": "Yamaha", "name": "Yamaha Nmax 160", "description": "Agilidade e tecnologia para o dia a dia.", "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/yamaha-nmax-160.jpg" },
