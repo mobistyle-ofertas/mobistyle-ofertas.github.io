@@ -42,6 +42,7 @@ const Facebook = (props: any) => (
 import { motion, AnimatePresence } from 'motion/react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { supabase } from './lib/supabase';
+import Analytics from './components/Analytics';
 
 // Types
 // ... (rest of types)
@@ -2003,6 +2004,7 @@ export default function App() {
   return (
     <HelmetProvider>
       <Router basename={import.meta.env.BASE_URL}>
+        <Analytics />
         <ScrollToTop />
         <div className="min-h-screen flex flex-col">
           <Navbar data={data} />
