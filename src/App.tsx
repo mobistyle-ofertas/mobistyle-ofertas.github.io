@@ -44,6 +44,15 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { supabase } from './lib/supabase';
 import Analytics from './components/Analytics';
 
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  if (dateStr.includes('/')) return dateStr;
+  const parts = dateStr.split('T')[0].split('-');
+  if (parts.length !== 3) return dateStr;
+  const [year, month, day] = parts;
+  return `${day}/${month}/${year}`;
+};
+
 // Types
 // ... (rest of types)
 interface NewsItem {
@@ -572,7 +581,7 @@ const Home = ({ data }: { data: SiteData | null }) => {
                       <span className="px-1.5 py-0.5 bg-white/10 backdrop-blur-md border border-white/10 text-white text-[8px] font-bold uppercase tracking-wider rounded">
                         {news.category}
                       </span>
-                      <span className="text-white/60 text-[9px] font-medium">{news.date}</span>
+                      <span className="text-white/60 text-[9px] font-medium">{formatDate(news.date)}</span>
                     </div>
                     
                     <h3 className={`${idx === 0 ? 'text-xl md:text-2xl' : 'text-base'} font-display font-bold text-white mb-1 leading-tight group-hover:text-zinc-200 transition-colors`}>
@@ -646,7 +655,7 @@ const Home = ({ data }: { data: SiteData | null }) => {
                       <span className="text-zinc-400 text-[9px] font-bold uppercase tracking-wider">
                         {news.category}
                       </span>
-                      <span className="text-zinc-300 text-[9px] font-medium">{news.date}</span>
+                      <span className="text-zinc-300 text-[9px] font-medium">{formatDate(news.date)}</span>
                     </div>
                     <h3 className="text-sm font-bold group-hover:text-zinc-700 transition-colors line-clamp-2 leading-snug">{news.title}</h3>
                     <div className="mt-3 pt-3 border-t border-zinc-50 flex items-center justify-between">
@@ -996,7 +1005,7 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
                   <span className="text-zinc-400 text-[9px] font-bold uppercase tracking-wider">
                     {news.category}
                   </span>
-                  <span className="text-zinc-300 text-[9px] font-medium">{news.date}</span>
+                  <span className="text-zinc-300 text-[9px] font-medium">{formatDate(news.date)}</span>
                 </div>
                 <h3 className="text-sm font-bold mb-2 group-hover:text-zinc-700 transition-colors line-clamp-2 leading-snug">{news.title}</h3>
                 <p className="text-zinc-500 text-[11px] line-clamp-2 leading-snug mb-4">{news.summary}</p>
@@ -1220,7 +1229,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
           <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
             {news.category}
           </span>
-          <span className="text-zinc-300 text-[10px] font-medium">{news.date}</span>
+          <span className="text-zinc-300 text-[10px] font-medium">{formatDate(news.date)}</span>
         </div>
 
         <h1 className="text-3xl md:text-4xl font-display font-bold mb-6 tracking-tight leading-tight">
@@ -1234,7 +1243,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
             </div>
             <div>
               <div className="text-[10px] font-bold text-zinc-900 uppercase tracking-wider">MobiStyle Redação</div>
-              <div className="text-[9px] text-zinc-400 uppercase">{news.date}</div>
+              <div className="text-[9px] text-zinc-400 uppercase">{formatDate(news.date)}</div>
             </div>
           </div>
           <ShareButtons title={news.title} url={`/noticia/${news.id}`} />
@@ -1370,7 +1379,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                       <span className="text-zinc-400 text-[8px] font-bold uppercase tracking-wider">
                         {n.category}
                       </span>
-                      <span className="text-zinc-300 text-[8px]">{n.date}</span>
+                      <span className="text-zinc-300 text-[8px]">{formatDate(n.date)}</span>
                     </div>
                     <h3 className="text-xs font-bold group-hover:text-zinc-700 transition-colors line-clamp-2 leading-snug">{n.title}</h3>
                   </div>
@@ -1753,7 +1762,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                           <span className="text-[9px] text-zinc-400 group-hover:text-zinc-900 uppercase font-bold tracking-wider transition-colors">
                             {n.category}
                           </span>
-                          <span className="text-[9px] text-zinc-300 uppercase font-bold">{n.date}</span>
+                          <span className="text-[9px] text-zinc-300 uppercase font-bold">{formatDate(n.date)}</span>
                         </div>
                         <h3 className="text-xs font-bold mb-2 line-clamp-2 leading-snug group-hover:text-zinc-700 transition-colors">{n.title}</h3>
                         <div className="flex items-center justify-between mt-auto pt-3 border-t border-zinc-50">
@@ -1926,11 +1935,7 @@ export default function App() {
                 content: n.content,
                 category: n.category,
                 image: n.image_url,
-                date: (() => {
-                  if (!n.date) return '';
-                  const [year, month, day] = n.date.split('T')[0].split('-').map(Number);
-                  return new Date(year, month - 1, day).toLocaleDateString('pt-BR');
-                })()
+                date: n.date || ''
               }));
             }
 
