@@ -361,6 +361,17 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
   );
 };
 
+const AffiliateNote = () => (
+  <div className="mt-16 pt-8 border-t border-zinc-100 mb-8">
+    <div className="bg-zinc-50 rounded-2xl p-6 md:p-8 border border-zinc-100">
+      <p className="text-[10px] md:text-[11px] text-zinc-500 leading-relaxed">
+        <span className="font-bold text-zinc-900 block mb-2 uppercase tracking-widest text-[9px]">Nota de transparência</span>
+        O MobiStyle Ofertas mantém uma parceria comercial com lojas parceiras. Ao clicar no link da varejista, o MobiStyle Ofertas pode ganhar uma parcela das vendas ou outro tipo de compensação. Os preços mencionados podem sofrer variação e a disponibilidade dos produtos está sujeita aos estoques.
+      </p>
+    </div>
+  </div>
+);
+
 const Footer = ({ data }: { data: SiteData | null }) => (
   <footer className="bg-zinc-900 text-zinc-500 py-8 mt-12">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1558,6 +1569,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
             </div>
           </div>
         )}
+        <AffiliateNote />
       </motion.div>
     );
   }
