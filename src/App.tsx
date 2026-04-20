@@ -93,6 +93,7 @@ interface Model {
   news: NewsItem[];
   usedBikes: UsedBike[];
   affiliates: AffiliateLink[];
+  searchUrl?: string;
 }
 
 interface Category {
@@ -1695,7 +1696,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
             {model.usedBikes.length > 0 && (
               <section>
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-display font-bold tracking-tight text-zinc-900">Seminovas no Webmotors</h2>
+                  <h2 className="text-xl font-display font-bold tracking-tight text-zinc-900">Melhores seminovas no Webmotors</h2>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {model.usedBikes.map((bike, i) => (
@@ -1736,6 +1737,19 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                     </a>
                   ))}
                 </div>
+                {model.searchUrl && (
+                  <div className="mt-6 flex justify-center">
+                    <a
+                      href={model.searchUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 border border-zinc-200 text-zinc-600 text-xs font-semibold rounded-xl hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+                    >
+                      Mais ofertas no Webmotors
+                      <ExternalLink className="w-4 h-4 text-zinc-400" />
+                    </a>
+                  </div>
+                )}
                 <p className="mt-6 text-[10px] sm:text-xs text-zinc-500 leading-relaxed bg-zinc-50 border border-zinc-100 p-3 rounded-lg">
                   <span className="font-bold text-zinc-700">Nota de transparência:</span> O MobiStyle Ofertas atua apenas na curadoria de links. Não recebemos qualquer comissão ou participação nas negociações de motos e scooters seminovas entre compradores e vendedores.
                 </p>
@@ -1927,15 +1941,17 @@ export default function App() {
         let news: NewsItem[] = [];
         let usedBikesData: Record<string, UsedBike[]> = {};
         let affiliatesData: Record<string, AffiliateLink[]> = {};
+        let searchTargetsData: Record<string, string> = {};
 
         const isSupabaseConfigured = import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY;
         
         if (isSupabaseConfigured) {
           try {
-            const [newsResult, usedResult, affiliatesResult] = await Promise.all([
+            const [newsResult, usedResult, affiliatesResult, searchTargetsResult] = await Promise.all([
               supabase.from('news').select('*').order('date', { ascending: false }),
               supabase.from('used_bikes').select('*'),
-              supabase.from('affiliates').select('*')
+              supabase.from('affiliates').select('*'),
+              supabase.from('search_targets').select('*').not('search_url', 'is', null)
             ]);
 
             if (newsResult.error) {
@@ -1980,6 +1996,14 @@ export default function App() {
                 });
               });
             }
+
+            if (searchTargetsResult.data && searchTargetsResult.data.length > 0) {
+              searchTargetsResult.data.forEach(s => {
+                if (s.search_url) {
+                  searchTargetsData[s.model_id] = s.search_url;
+                }
+              });
+            }
           } catch (supaErr) {
             setSupaError(supaErr instanceof Error ? supaErr.message : 'Unknown Supabase error');
             console.warn("Supabase fetch failed, falling back to JSON:", supaErr);
@@ -2007,7 +2031,8 @@ export default function App() {
           ...m,
           news: news.filter((n: any) => n.modelIds?.includes(m.id)),
           usedBikes: usedBikesData[m.id] || [],
-          affiliates: affiliatesData[m.id] || []
+          affiliates: affiliatesData[m.id] || [],
+          searchUrl: searchTargetsData[m.id] || null
         }));
 
         const homeNews = news.filter((n: any) => !n.modelIds || n.modelIds.length === 0);
