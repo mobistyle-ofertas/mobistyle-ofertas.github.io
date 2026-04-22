@@ -875,7 +875,6 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
 const NewsList = ({ data }: { data: SiteData | null }) => {
   const [visibleCount, setVisibleCount] = useState(12);
   const [allNews, setAllNews] = useState<NewsItem[]>([]);
-  const [searchParams, setSearchParams] = useLocation().search ? new URLSearchParams(useLocation().search) : new URLSearchParams();
   const location = useLocation();
   
   const selectedCategory = new URLSearchParams(location.search).get('category');
