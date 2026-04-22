@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
-import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy } from 'lucide-react';
+import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy, ShoppingBag } from 'lucide-react';
 
 // Custom Brand Icons (removed from recent lucide-react versions)
 const Instagram = (props: any) => (
@@ -94,6 +94,7 @@ interface Model {
   usedBikes: UsedBike[];
   affiliates: AffiliateLink[];
   searchUrl?: string;
+  categorySearchUrl?: string;
 }
 
 interface Category {
@@ -230,41 +231,24 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
 
   const nonEmptyCategories = useMemo(() => {
     if (!data) return [];
-    return data.categories.filter(cat => getModelsByCategory(cat.id).length > 0);
+    
+    // Default categories to show regardless of models
+    const alwaysVisibleCategoryIds = ['motos-scooters'];
+    
+    return data.categories.filter(cat => 
+      alwaysVisibleCategoryIds.includes(cat.id) || getModelsByCategory(cat.id).length > 0
+    );
   }, [data]);
 
   const NavItem = ({ to, label, catId }: any) => {
-    const models = catId ? getModelsByCategory(catId) : [];
-    const hasSubmenu = models.length > 0;
-
     return (
-      <div 
-        className="relative group"
-        onMouseEnter={() => catId && setActiveDropdown(catId)}
-        onMouseLeave={() => setActiveDropdown(null)}
-      >
+      <div className="relative group">
         <Link 
           to={to} 
           className="flex items-center gap-1 text-zinc-500 hover:text-zinc-900 text-sm font-medium transition-colors py-4"
         >
           {label}
-          {hasSubmenu && <ChevronDown className="w-3 h-3 opacity-50" />}
         </Link>
-
-        {hasSubmenu && activeDropdown === catId && (
-          <div className="absolute top-full left-0 w-64 bg-white border border-zinc-200 shadow-xl rounded-xl py-4 z-50">
-            {models.map(model => (
-              <Link
-                key={model.id}
-                to={`/model/${model.id}`}
-                className="block px-6 py-2 text-sm text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 transition-colors"
-                onClick={() => setActiveDropdown(null)}
-              >
-                {model.name}
-              </Link>
-            ))}
-          </div>
-        )}
       </div>
     );
   };
@@ -316,8 +300,6 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
               {/* Mobile Submenus */}
               {nonEmptyCategories.map(cat => {
                 const catId = cat.id;
-                const models = getModelsByCategory(catId);
-                const isExpanded = expandedMobileCat === catId;
 
                 return (
                   <div key={catId} className="space-y-1 border-b border-zinc-100">
@@ -329,37 +311,7 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
                       >
                         {cat?.name}
                       </Link>
-                      <button 
-                        onClick={() => setExpandedMobileCat(isExpanded ? null : catId)}
-                        className="px-4 py-3 text-zinc-400"
-                      >
-                        <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
-                      </button>
                     </div>
-                    
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div 
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden bg-zinc-50"
-                        >
-                          <div className="pl-4 py-2 space-y-1">
-                            {models.map(model => (
-                              <Link
-                                key={model.id}
-                                to={`/model/${model.id}`}
-                                onClick={() => setIsOpen(false)}
-                                className="block px-3 py-2 text-zinc-500 text-sm hover:text-zinc-900 transition-colors"
-                              >
-                                {model.name}
-                              </Link>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </div>
                 );
               })}
@@ -429,6 +381,9 @@ const Footer = ({ data }: { data: SiteData | null }) => (
                   <MessageCircleCheck className="w-8 h-8" />
                 </a>
               )}
+              <a href="https://www.mercadolivre.com.br/social/thiagoleopoldo" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Mercado Livre">
+                <ShoppingBag className="w-8 h-8" />
+              </a>
             </div>
           )}
         </div>
@@ -729,6 +684,33 @@ const Home = ({ data }: { data: SiteData | null }) => {
           </div>
         </section>
       )}
+
+      {/* Global Recommended Lists Tag Cloud */}
+      {data.models.filter(m => m.categorySearchUrl).length > 0 && (
+        <section className="mt-24 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-display font-bold tracking-tight">Confira essa seleção de ofertas no Mercado Livre</h2>
+            <div className="h-px flex-grow mx-6 bg-zinc-100 hidden sm:block"></div>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
+              {data.models.filter(m => m.categorySearchUrl).map((model) => (
+                <a
+                  key={`tag-${model.id}`}
+                  href={model.categorySearchUrl!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
+                >
+                  {model.name}
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
     </motion.div>
   );
 };
@@ -859,6 +841,33 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
           <p className="text-zinc-400">Nenhum modelo encontrado para esta marca.</p>
         </div>
       )}
+
+      {/* Recommended Lists Tag Cloud */}
+      {filteredModels.filter(m => m.categorySearchUrl).length > 0 && (
+        <section className="mt-16 pt-16 border-t border-zinc-100 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-display font-bold tracking-tight">Listas de ofertas no Mercado Livre</h2>
+            <div className="h-px flex-grow mx-6 bg-zinc-100 hidden sm:block"></div>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
+              {filteredModels.filter(m => m.categorySearchUrl).map((model) => (
+                <a
+                  key={`tag-${model.id}`}
+                  href={model.categorySearchUrl!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
+                >
+                  {model.name}
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
     </motion.div>
   );
 };
@@ -1358,10 +1367,35 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
         postUrl={window.location.href} 
       />
 
+      {/* Recommended Lists Tag Cloud */}
+      {data.models.filter(m => m.categorySearchUrl).length > 0 && (
+        <section className="mt-16 pt-16 border-t border-zinc-100 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold tracking-tight">Listas de ofertas no Mercado Livre</h2>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
+              {data.models.filter(m => m.categorySearchUrl).map((model) => (
+                <a
+                  key={`tag-${model.id}`}
+                  href={model.categorySearchUrl!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
+                >
+                  {model.name}
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {relatedNews.length > 0 && (
         <div className="mt-12 pt-8 border-t border-zinc-100">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold tracking-tight">Notícias Relacionadas</h2>
+            <h2 className="text-xl font-bold tracking-tight">Notícias relacionadas</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {relatedNews.map((n, i) => (
@@ -2032,7 +2066,8 @@ export default function App() {
           news: news.filter((n: any) => n.modelIds?.includes(m.id)),
           usedBikes: usedBikesData[m.id] || [],
           affiliates: affiliatesData[m.id] || [],
-          searchUrl: searchTargetsData[m.id] || null
+          searchUrl: searchTargetsData[m.id] || null,
+          categorySearchUrl: m.categorySearchUrl || null
         }));
 
         const homeNews = news.filter((n: any) => !n.modelIds || n.modelIds.length === 0);
