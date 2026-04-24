@@ -419,6 +419,138 @@ const Footer = ({ data }: { data: SiteData | null }) => (
   </footer>
 );
 
+const CompareModels = ({ data }: { data: SiteData | null }) => {
+  const [model1Id, setModel1Id] = useState<string>('');
+  const [model2Id, setModel2Id] = useState<string>('');
+
+  if (!data) return null;
+
+  const model1 = data.models.find(m => m.id === model1Id);
+  const model2 = data.models.find(m => m.id === model2Id);
+
+  // Collect all unique specs checking their labels
+  const allSpecs = new Set<string>();
+  model1?.specs?.forEach(s => allSpecs.add(s.label));
+  model2?.specs?.forEach(s => allSpecs.add(s.label));
+  const sortedSpecs = Array.from(allSpecs);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"
+    >
+      <Helmet>
+        <title>Comparador de Motos e Scooters | MobiStyle</title>
+        <meta name="description" content="Compare motos e scooters, confira ficha técnica e ofertas no MobiStyle." />
+      </Helmet>
+
+      <div className="text-center mb-12">
+        <h1 className="text-3xl md:text-4xl font-display font-medium text-zinc-900 tracking-tight mb-4">
+          Comparador de Modelos
+        </h1>
+        <p className="text-zinc-500 max-w-2xl mx-auto">
+          Selecione dois modelos abaixo para comparar a ficha técnica e veja qual atende melhor às suas necessidades.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 sm:gap-8 mb-12">
+        {/* Model 1 Select */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-zinc-700 mb-2">Modelo 1</label>
+          <select
+            className="w-full border-zinc-200 rounded-lg shadow-sm focus:border-zinc-900 focus:ring-zinc-900 text-xs sm:text-sm"
+            value={model1Id}
+            onChange={(e) => setModel1Id(e.target.value)}
+          >
+            <option value="">Selecione...</option>
+            {data.models.filter(m => m.categoryId === 'motos-scooters').map(m => (
+              <option key={m.id} value={m.id}>{m.name}</option>
+            ))}
+          </select>
+
+          {model1 && (
+            <div className="mt-4 sm:mt-6 border border-zinc-200 rounded-2xl overflow-hidden bg-white">
+              {model1.image && (
+                <div className="aspect-[4/3] bg-zinc-100 flex items-center justify-center p-3 sm:p-6 mix-blend-multiply">
+                  <img src={model1.image} alt={model1.name} className="w-full h-full object-contain mix-blend-multiply" />
+                </div>
+              )}
+              <div className="p-3 sm:p-6 text-center sm:text-left">
+                <h3 className="text-sm sm:text-xl font-bold mb-1 sm:mb-2 line-clamp-2">{model1.name}</h3>
+                <Link to={`/model/${model1.id}`} className="text-zinc-600 hover:text-zinc-900 text-xs sm:text-sm font-medium inline-flex items-center gap-1">
+                  Detalhes <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 hidden sm:inline" />
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Model 2 Select */}
+        <div>
+          <label className="block text-xs sm:text-sm font-medium text-zinc-700 mb-2">Modelo 2</label>
+          <select
+            className="w-full border-zinc-200 rounded-lg shadow-sm focus:border-zinc-900 focus:ring-zinc-900 text-xs sm:text-sm"
+            value={model2Id}
+            onChange={(e) => setModel2Id(e.target.value)}
+          >
+            <option value="">Selecione...</option>
+            {data.models.filter(m => m.categoryId === 'motos-scooters').map(m => (
+              <option key={m.id} value={m.id}>{m.name}</option>
+            ))}
+          </select>
+
+          {model2 && (
+            <div className="mt-4 sm:mt-6 border border-zinc-200 rounded-2xl overflow-hidden bg-white">
+              {model2.image && (
+                <div className="aspect-[4/3] bg-zinc-100 flex items-center justify-center p-3 sm:p-6 mix-blend-multiply">
+                  <img src={model2.image} alt={model2.name} className="w-full h-full object-contain mix-blend-multiply" />
+                </div>
+              )}
+              <div className="p-3 sm:p-6 text-center sm:text-left">
+                <h3 className="text-sm sm:text-xl font-bold mb-1 sm:mb-2 line-clamp-2">{model2.name}</h3>
+                <Link to={`/model/${model2.id}`} className="text-zinc-600 hover:text-zinc-900 text-xs sm:text-sm font-medium inline-flex items-center gap-1">
+                  Detalhes <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 hidden sm:inline" />
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Comparison Table */}
+      {(model1 || model2) && sortedSpecs.length > 0 && (
+        <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-full sm:min-w-[600px]">
+              <thead>
+                <tr className="bg-zinc-50 border-b border-zinc-200">
+                  <th className="p-3 sm:p-4 text-xs sm:text-sm font-medium text-zinc-500 w-1/3">Especificação</th>
+                  <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-zinc-900 w-1/3">{model1?.name || '-'}</th>
+                  <th className="p-3 sm:p-4 text-xs sm:text-sm font-bold text-zinc-900 w-1/3 border-l border-zinc-200">{model2?.name || '-'}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-200">
+                {sortedSpecs.map(specName => {
+                  const val1 = model1?.specs?.find(s => s.label === specName)?.value || '-';
+                  const val2 = model2?.specs?.find(s => s.label === specName)?.value || '-';
+                  return (
+                    <tr key={specName} className="hover:bg-zinc-50 transition-colors">
+                      <td className="p-3 sm:p-4 text-xs sm:text-sm font-medium text-zinc-700 bg-zinc-50/50">{specName}</td>
+                      <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-600 bg-white">{val1}</td>
+                      <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-600 bg-white border-l border-zinc-200">{val2}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
 const Home = ({ data }: { data: SiteData | null }) => {
   const [newsLimit] = useState(7);
   if (!data) return null;
@@ -777,11 +909,23 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
             <p className="text-zinc-500 text-sm max-w-2xl">{category.description}</p>
           </div>
           
-          {/* Brand Filter */}
-          {brands.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              <button
-                onClick={() => setSelectedBrand(null)}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
+            {/* Compare Button */}
+            {categoryId === 'motos-scooters' && (
+              <Link 
+                to="/comparador" 
+                className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-zinc-800 transition-colors"
+              >
+                Comparar Modelos
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
+
+            {/* Brand Filter */}
+            {brands.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => setSelectedBrand(null)}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
                   selectedBrand === null 
                     ? 'bg-zinc-900 text-white' 
@@ -804,7 +948,8 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
                 </button>
               ))}
             </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -2129,6 +2274,7 @@ export default function App() {
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<Home data={data} />} />
+              <Route path="/comparador" element={<CompareModels data={data} />} />
               <Route path="/noticias" element={<NewsList data={data} />} />
               <Route path="/noticia/:newsId" element={<NewsDetail data={data} />} />
               <Route path="/category/:categoryId" element={<CategoryPage data={data} />} />
