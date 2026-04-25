@@ -848,21 +848,35 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold tracking-tight">Listas de ofertas no Mercado Livre</h2>
           </div>
-          <div className="flex flex-col items-center">
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
-              {data.models.filter(m => m.categorySearchUrl && m.released !== false).map((model) => (
-                <a
-                  key={`tag-${model.id}`}
-                  href={model.categorySearchUrl!}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
-                >
-                  {model.name}
-                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
-                </a>
-              ))}
-            </div>
+          <div className="flex flex-col items-center gap-4 sm:gap-6">
+            {['equipamentos', 'gadgets'].map(catId => {
+              const catModels = data.models
+                .filter(m => m.categoryId === catId && m.categorySearchUrl && m.released !== false)
+                .sort((a, b) => {
+                  if (a.categoryId === 'equipamentos') {
+                    if (a.id === 'capacetes') return -1;
+                    if (b.id === 'capacetes') return 1;
+                  }
+                  return a.name.localeCompare(b.name);
+                });
+              if (catModels.length === 0) return null;
+              return (
+                <div key={catId} className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
+                  {catModels.map((model) => (
+                    <a
+                      key={`tag-${model.id}`}
+                      href={model.categorySearchUrl!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
+                    >
+                      {model.name}
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                    </a>
+                  ))}
+                </div>
+              );
+            })}
           </div>
         </section>
       )}
@@ -1143,21 +1157,35 @@ const Home = ({ data }: { data: SiteData | null }) => {
             <h2 className="text-2xl font-display font-bold tracking-tight">Confira essa seleção de ofertas no Mercado Livre</h2>
             <div className="h-px flex-grow mx-6 bg-zinc-100 hidden sm:block"></div>
           </div>
-          <div className="flex flex-col items-center">
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
-              {data.models.filter(m => m.categorySearchUrl && m.released !== false).map((model) => (
-                <a
-                  key={`tag-${model.id}`}
-                  href={model.categorySearchUrl!}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
-                >
-                  {model.name}
-                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
-                </a>
-              ))}
-            </div>
+          <div className="flex flex-col items-center gap-4 sm:gap-6">
+            {['equipamentos', 'gadgets'].map(catId => {
+              const catModels = data.models
+                .filter(m => m.categoryId === catId && m.categorySearchUrl && m.released !== false)
+                .sort((a, b) => {
+                  if (a.categoryId === 'equipamentos') {
+                    if (a.id === 'capacetes') return -1;
+                    if (b.id === 'capacetes') return 1;
+                  }
+                  return a.name.localeCompare(b.name);
+                });
+              if (catModels.length === 0) return null;
+              return (
+                <div key={catId} className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
+                  {catModels.map((model) => (
+                    <a
+                      key={`tag-${model.id}`}
+                      href={model.categorySearchUrl!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
+                    >
+                      {model.name}
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                    </a>
+                  ))}
+                </div>
+              );
+            })}
           </div>
         </section>
       )}
@@ -1174,15 +1202,21 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
 
   const category = data.categories.find(c => c.id === categoryId);
   const allModelsInCategory = data.models.filter(m => 
-    m.categoryId === categoryId && m.released !== false && ((m.affiliates?.length || 0) > 0 || (m.usedBikes?.length || 0) > 0)
+    m.categoryId === categoryId && m.released !== false && ((m.affiliates?.length || 0) > 0 || (m.usedBikes?.length || 0) > 0 || !!m.categorySearchUrl)
   );
   
   // Extract unique brands for filtering
   const brands = Array.from(new Set(allModelsInCategory.map(m => m.brand).filter(Boolean))) as string[];
   
-  const filteredModels = selectedBrand 
+  const filteredModels = (selectedBrand 
     ? allModelsInCategory.filter(m => m.brand === selectedBrand)
-    : allModelsInCategory;
+    : allModelsInCategory).sort((a, b) => {
+      if (categoryId === 'equipamentos') {
+        if (a.id === 'capacetes') return -1;
+        if (b.id === 'capacetes') return 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
 
   const isMenuMode = ['equipamentos', 'gadgets', 'motos-scooters'].includes(categoryId || '');
 
@@ -1314,19 +1348,35 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
             <div className="h-px flex-grow mx-6 bg-zinc-100 hidden sm:block"></div>
           </div>
           <div className="flex flex-col items-center">
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
-              {filteredModels.filter(m => m.categorySearchUrl).map((model) => (
-                <a
-                  key={`tag-${model.id}`}
-                  href={model.categorySearchUrl!}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
-                >
-                  {model.name}
-                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
-                </a>
-              ))}
+            <div className="flex flex-col items-center gap-4 sm:gap-6">
+              {['equipamentos', 'gadgets'].map(catId => {
+                const catModels = filteredModels
+                  .filter(m => m.categoryId === catId && m.categorySearchUrl)
+                  .sort((a, b) => {
+                    if (a.categoryId === 'equipamentos') {
+                      if (a.id === 'capacetes') return -1;
+                      if (b.id === 'capacetes') return 1;
+                    }
+                    return a.name.localeCompare(b.name);
+                  });
+                if (catModels.length === 0) return null;
+                return (
+                  <div key={catId} className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
+                    {catModels.map((model) => (
+                      <a
+                        key={`tag-${model.id}`}
+                        href={model.categorySearchUrl!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
+                      >
+                        {model.name}
+                        <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                      </a>
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -1836,21 +1886,35 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold tracking-tight">Listas de ofertas no Mercado Livre</h2>
           </div>
-          <div className="flex flex-col items-center">
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
-              {data.models.filter(m => m.categorySearchUrl && m.released !== false).map((model) => (
-                <a
-                  key={`tag-${model.id}`}
-                  href={model.categorySearchUrl!}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
-                >
-                  {model.name}
-                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
-                </a>
-              ))}
-            </div>
+          <div className="flex flex-col items-center gap-4 sm:gap-6">
+            {['equipamentos', 'gadgets'].map(catId => {
+              const catModels = data.models
+                .filter(m => m.categoryId === catId && m.categorySearchUrl && m.released !== false)
+                .sort((a, b) => {
+                  if (a.categoryId === 'equipamentos') {
+                    if (a.id === 'capacetes') return -1;
+                    if (b.id === 'capacetes') return 1;
+                  }
+                  return a.name.localeCompare(b.name);
+                });
+              if (catModels.length === 0) return null;
+              return (
+                <div key={catId} className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
+                  {catModels.map((model) => (
+                    <a
+                      key={`tag-${model.id}`}
+                      href={model.categorySearchUrl!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
+                    >
+                      {model.name}
+                      <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                    </a>
+                  ))}
+                </div>
+              );
+            })}
           </div>
         </section>
       )}
