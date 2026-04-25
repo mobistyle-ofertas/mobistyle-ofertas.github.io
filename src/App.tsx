@@ -95,6 +95,7 @@ interface Model {
   affiliates: AffiliateLink[];
   searchUrl?: string;
   categorySearchUrl?: string;
+  released?: boolean;
 }
 
 interface Category {
@@ -226,7 +227,7 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
   }, [isOpen]);
 
   const getModelsByCategory = (catId: string) => {
-    return data?.models.filter(m => m.categoryId === catId && m.affiliates.length > 0) || [];
+    return data?.models.filter(m => m.categoryId === catId && m.affiliates.length > 0 && m.released !== false) || [];
   };
 
   const nonEmptyCategories = useMemo(() => {
@@ -422,6 +423,83 @@ const Footer = ({ data }: { data: SiteData | null }) => (
 const CompareModels = ({ data }: { data: SiteData | null }) => {
   const [model1Id, setModel1Id] = useState<string>('');
   const [model2Id, setModel2Id] = useState<string>('');
+  const [usedBikes1, setUsedBikes1] = useState<UsedBike[]>([]);
+  const [usedBikes2, setUsedBikes2] = useState<UsedBike[]>([]);
+  const [loadingUsed, setLoadingUsed] = useState({ model1: false, model2: false });
+
+  useEffect(() => {
+    const fetchUsed = async (modelId: string, setBikes: (bikes: UsedBike[]) => void, key: 'model1' | 'model2') => {
+      if (!modelId) {
+        setBikes([]);
+        return;
+      }
+      
+      setLoadingUsed(prev => ({ ...prev, [key]: true }));
+      try {
+        const { data: usedData, error } = await supabase
+          .from('used_bikes')
+          .select('*')
+          .eq('model_id', modelId)
+          .order('price', { ascending: true })
+          .limit(4);
+
+        if (error) throw error;
+
+        if (usedData) {
+          setBikes(usedData.map(u => ({
+            title: u.title,
+            price: Number(u.price),
+            image_url: u.image_url,
+            url: u.external_url
+          })));
+        }
+      } catch (err) {
+        console.error(`Error fetching used bikes for ${modelId}:`, err);
+        setBikes([]);
+      } finally {
+        setLoadingUsed(prev => ({ ...prev, [key]: false }));
+      }
+    };
+
+    fetchUsed(model1Id, setUsedBikes1, 'model1');
+  }, [model1Id]);
+
+  useEffect(() => {
+    const fetchUsed = async (modelId: string, setBikes: (bikes: UsedBike[]) => void, key: 'model1' | 'model2') => {
+      if (!modelId) {
+        setBikes([]);
+        return;
+      }
+      
+      setLoadingUsed(prev => ({ ...prev, [key]: true }));
+      try {
+        const { data: usedData, error } = await supabase
+          .from('used_bikes')
+          .select('*')
+          .eq('model_id', modelId)
+          .order('price', { ascending: true })
+          .limit(4);
+
+        if (error) throw error;
+
+        if (usedData) {
+          setBikes(usedData.map(u => ({
+            title: u.title,
+            price: Number(u.price),
+            image_url: u.image_url,
+            url: u.external_url
+          })));
+        }
+      } catch (err) {
+        console.error(`Error fetching used bikes for ${modelId}:`, err);
+        setBikes([]);
+      } finally {
+        setLoadingUsed(prev => ({ ...prev, [key]: false }));
+      }
+    };
+
+    fetchUsed(model2Id, setUsedBikes2, 'model2');
+  }, [model2Id]);
 
   if (!data) return null;
 
@@ -457,16 +535,18 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
       <div className="grid grid-cols-2 gap-4 sm:gap-8 mb-12">
         {/* Model 1 Select */}
         <div>
-          <label className="block text-xs sm:text-sm font-medium text-zinc-700 mb-2">Modelo 1</label>
           <select
             className="w-full border-zinc-200 rounded-lg shadow-sm focus:border-zinc-900 focus:ring-zinc-900 text-xs sm:text-sm"
             value={model1Id}
             onChange={(e) => setModel1Id(e.target.value)}
           >
-            <option value="">Selecione...</option>
-            {data.models.filter(m => m.categoryId === 'motos-scooters').map(m => (
-              <option key={m.id} value={m.id}>{m.name}</option>
-            ))}
+            <option value="">Selecione o modelo 1...</option>
+            {data.models
+              .filter(m => m.categoryId === 'motos-scooters' && m.released !== false)
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map(m => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
           </select>
 
           {model1 && (
@@ -488,16 +568,18 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
 
         {/* Model 2 Select */}
         <div>
-          <label className="block text-xs sm:text-sm font-medium text-zinc-700 mb-2">Modelo 2</label>
           <select
             className="w-full border-zinc-200 rounded-lg shadow-sm focus:border-zinc-900 focus:ring-zinc-900 text-xs sm:text-sm"
             value={model2Id}
             onChange={(e) => setModel2Id(e.target.value)}
           >
-            <option value="">Selecione...</option>
-            {data.models.filter(m => m.categoryId === 'motos-scooters').map(m => (
-              <option key={m.id} value={m.id}>{m.name}</option>
-            ))}
+            <option value="">Selecione o modelo 2...</option>
+            {data.models
+              .filter(m => m.categoryId === 'motos-scooters' && m.released !== false)
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map(m => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
           </select>
 
           {model2 && (
@@ -520,7 +602,7 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
 
       {/* Comparison Table */}
       {(model1 || model2) && sortedSpecs.length > 0 && (
-        <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden">
+        <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden mb-8">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-full sm:min-w-[600px]">
               <thead>
@@ -546,6 +628,178 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
             </table>
           </div>
         </div>
+      )}
+
+      {/* Used Bikes Section */}
+      {(model1 || model2) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Used Bikes Model 1 */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+                <Tag className="w-5 h-5" />
+                Seminovas: {model1?.name || 'Selecione o Modelo 1'}
+              </h3>
+              {model1 && (
+                <Link 
+                  to={`/model/${model1.id}`}
+                  className="text-xs font-medium text-zinc-500 hover:text-zinc-900 flex items-center gap-1 transition-colors"
+                >
+                  Ver mais <ArrowRight className="w-3 h-3" />
+                </Link>
+              )}
+            </div>
+            {model1 ? (
+              <div className="relative min-h-[100px]">
+                {loadingUsed.model1 ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="w-6 h-6 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin"></div>
+                  </div>
+                ) : usedBikes1.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {usedBikes1.map((bike, i) => (
+                      <a 
+                        key={i} 
+                        href={bike.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="group bg-white border border-zinc-100 rounded-lg overflow-hidden hover:border-zinc-300 transition-all flex flex-col"
+                      >
+                        <div className="aspect-[4/3] overflow-hidden bg-zinc-50">
+                          <img 
+                            src={bike.image_url || 'https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/logo.png'} 
+                            alt={bike.title} 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              if (!target.src.includes('logo.png')) {
+                                target.src = 'https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/logo.png';
+                                target.classList.add('invert', 'object-contain', 'p-6', 'bg-zinc-900');
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className="p-2 flex flex-col flex-grow">
+                          <div className="flex justify-between items-start mb-1">
+                            <h3 className="font-bold text-[10px] leading-tight text-zinc-900 group-hover:text-zinc-700 transition-colors line-clamp-2 h-7">{bike.title}</h3>
+                            <ExternalLink className="w-2.5 h-2.5 text-zinc-300 group-hover:text-zinc-900 transition-colors flex-shrink-0 ml-1" />
+                          </div>
+                          
+                          <div className="mt-auto pt-1.5 border-t border-zinc-50 flex items-center justify-between">
+                            <span className="text-xs font-display font-bold text-zinc-900">
+                              R$ {bike.price.toLocaleString('pt-BR')}
+                            </span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-zinc-50 rounded-xl border border-dashed border-zinc-200 text-center text-sm text-zinc-500">
+                    Nenhuma oferta encontrada para este modelo.
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+
+          {/* Used Bikes Model 2 */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+                <Tag className="w-5 h-5" />
+                Seminovas: {model2?.name || 'Selecione o Modelo 2'}
+              </h3>
+              {model2 && (
+                <Link 
+                  to={`/model/${model2.id}`}
+                  className="text-xs font-medium text-zinc-500 hover:text-zinc-900 flex items-center gap-1 transition-colors"
+                >
+                  Ver mais <ArrowRight className="w-3 h-3" />
+                </Link>
+              )}
+            </div>
+            {model2 ? (
+              <div className="relative min-h-[100px]">
+                {loadingUsed.model2 ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="w-6 h-6 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin"></div>
+                  </div>
+                ) : usedBikes2.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {usedBikes2.map((bike, i) => (
+                      <a 
+                        key={i} 
+                        href={bike.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="group bg-white border border-zinc-100 rounded-lg overflow-hidden hover:border-zinc-300 transition-all flex flex-col"
+                      >
+                        <div className="aspect-[4/3] overflow-hidden bg-zinc-50">
+                          <img 
+                            src={bike.image_url || 'https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/logo.png'} 
+                            alt={bike.title} 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              if (!target.src.includes('logo.png')) {
+                                target.src = 'https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/logo.png';
+                                target.classList.add('invert', 'object-contain', 'p-6', 'bg-zinc-900');
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className="p-2 flex flex-col flex-grow">
+                          <div className="flex justify-between items-start mb-1">
+                            <h3 className="font-bold text-[10px] leading-tight text-zinc-900 group-hover:text-zinc-700 transition-colors line-clamp-2 h-7">{bike.title}</h3>
+                            <ExternalLink className="w-2.5 h-2.5 text-zinc-300 group-hover:text-zinc-900 transition-colors flex-shrink-0 ml-1" />
+                          </div>
+                          
+                          <div className="mt-auto pt-1.5 border-t border-zinc-50 flex items-center justify-between">
+                            <span className="text-xs font-display font-bold text-zinc-900">
+                              R$ {bike.price.toLocaleString('pt-BR')}
+                            </span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-zinc-50 rounded-xl border border-dashed border-zinc-200 text-center text-sm text-zinc-500">
+                    Nenhuma oferta encontrada para este modelo.
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* Recommended Lists Tag Cloud */}
+      {data.models.filter(m => m.categorySearchUrl && m.released !== false).length > 0 && (
+        <section className="mt-16 pt-16 border-t border-zinc-100 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold tracking-tight">Listas de ofertas no Mercado Livre</h2>
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
+              {data.models.filter(m => m.categorySearchUrl && m.released !== false).map((model) => (
+                <a
+                  key={`tag-${model.id}`}
+                  href={model.categorySearchUrl!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-2.5 bg-white border border-zinc-200 text-zinc-700 font-bold text-xs sm:text-sm shadow-sm rounded-full hover:border-zinc-900 hover:shadow-md hover:text-zinc-900 transition-all inline-flex items-center gap-2"
+                >
+                  {model.name}
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
       )}
     </motion.div>
   );
@@ -818,7 +1072,7 @@ const Home = ({ data }: { data: SiteData | null }) => {
       )}
 
       {/* Global Recommended Lists Tag Cloud */}
-      {data.models.filter(m => m.categorySearchUrl).length > 0 && (
+      {data.models.filter(m => m.categorySearchUrl && m.released !== false).length > 0 && (
         <section className="mt-24 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-display font-bold tracking-tight">Confira essa seleção de ofertas no Mercado Livre</h2>
@@ -826,7 +1080,7 @@ const Home = ({ data }: { data: SiteData | null }) => {
           </div>
           <div className="flex flex-col items-center">
             <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
-              {data.models.filter(m => m.categorySearchUrl).map((model) => (
+              {data.models.filter(m => m.categorySearchUrl && m.released !== false).map((model) => (
                 <a
                   key={`tag-${model.id}`}
                   href={model.categorySearchUrl!}
@@ -855,7 +1109,7 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
 
   const category = data.categories.find(c => c.id === categoryId);
   const allModelsInCategory = data.models.filter(m => 
-    m.categoryId === categoryId && ((m.affiliates?.length || 0) > 0 || (m.usedBikes?.length || 0) > 0)
+    m.categoryId === categoryId && m.released !== false && ((m.affiliates?.length || 0) > 0 || (m.usedBikes?.length || 0) > 0)
   );
   
   // Extract unique brands for filtering
@@ -1295,7 +1549,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
 
   if (!news) return <div className="p-20 text-center">Notícia não encontrada.</div>;
 
-  const relatedModels = data.models.filter(m => news?.modelIds?.includes(m.id));
+  const relatedModels = data.models.filter(m => news?.modelIds?.includes(m.id) && m.released !== false);
 
   const relatedNews = useMemo(() => {
     if (!data || !news) return [];
@@ -1326,7 +1580,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
     
     // Filter models that are "subcategories" of equipment and have offers
     const equipmentSubcategories = data.models.filter(m => 
-      m.categoryId === 'equipamentos' && m.affiliates.length > 0
+      m.categoryId === 'equipamentos' && m.affiliates.length > 0 && m.released !== false
     );
 
     if (equipmentSubcategories.length === 0) return null;
@@ -1512,14 +1766,14 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
       />
 
       {/* Recommended Lists Tag Cloud */}
-      {data.models.filter(m => m.categorySearchUrl).length > 0 && (
+      {data.models.filter(m => m.categorySearchUrl && m.released !== false).length > 0 && (
         <section className="mt-16 pt-16 border-t border-zinc-100 mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold tracking-tight">Listas de ofertas no Mercado Livre</h2>
           </div>
           <div className="flex flex-col items-center">
             <div className="flex flex-wrap justify-center gap-3 sm:gap-4 max-w-5xl">
-              {data.models.filter(m => m.categorySearchUrl).map((model) => (
+              {data.models.filter(m => m.categorySearchUrl && m.released !== false).map((model) => (
                 <a
                   key={`tag-${model.id}`}
                   href={model.categorySearchUrl!}
@@ -1602,7 +1856,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
     
     // Filter models that are "subcategories" of equipment and have offers
     const equipmentSubcategories = data.models.filter(m => 
-      m.categoryId === 'equipamentos' && m.affiliates.length > 0
+      m.categoryId === 'equipamentos' && m.affiliates.length > 0 && m.released !== false
     );
 
     if (equipmentSubcategories.length === 0) return null;
@@ -2194,11 +2448,6 @@ export default function App() {
           if (newsRes.ok) news = await newsRes.json();
         }
         
-        if (Object.keys(usedBikesData).length === 0) {
-          const usedBikesRes = await fetch(`${normalizedBaseUrl}used_bikes.json`);
-          if (usedBikesRes.ok) usedBikesData = await usedBikesRes.json();
-        }
-
         if (Object.keys(affiliatesData).length === 0) {
           const affiliatesRes = await fetch(`${normalizedBaseUrl}affiliates.json`);
           if (affiliatesRes.ok) affiliatesData = await affiliatesRes.json();
