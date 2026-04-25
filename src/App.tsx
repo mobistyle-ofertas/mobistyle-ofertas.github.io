@@ -501,6 +501,41 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
     fetchUsed(model2Id, setUsedBikes2, 'model2');
   }, [model2Id]);
 
+  const groupedModels = useMemo(() => {
+    if (!data) return {};
+    
+    const filtered = data.models.filter(m => m.categoryId === 'motos-scooters' && m.released !== false);
+    
+    const groups: Record<string, Model[]> = {};
+    filtered.forEach(m => {
+      const brand = m.brand || 'Outros';
+      if (!groups[brand]) groups[brand] = [];
+      groups[brand].push(m);
+    });
+
+    const getPower = (m: Model) => {
+      const spec = m.specs?.find(s => s.label === 'Potência');
+      if (!spec) return 0;
+      return parseFloat(spec.value.replace(',', '.').replace(/[^0-9.]/g, '')) || 0;
+    };
+
+    // Sort models within each brand by power
+    Object.keys(groups).forEach(brand => {
+      groups[brand].sort((a, b) => {
+        const pA = getPower(a);
+        const pB = getPower(b);
+        if (pA !== pB) return pA - pB;
+        return a.name.localeCompare(b.name);
+      });
+    });
+
+    return groups;
+  }, [data]);
+
+  const sortedBrands = useMemo(() => {
+    return Object.keys(groupedModels).sort((a, b) => a.localeCompare(b));
+  }, [groupedModels]);
+
   if (!data) return null;
 
   const model1 = data.models.find(m => m.id === model1Id);
@@ -541,12 +576,16 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
             onChange={(e) => setModel1Id(e.target.value)}
           >
             <option value="">Selecione o modelo 1...</option>
-            {data.models
-              .filter(m => m.categoryId === 'motos-scooters' && m.released !== false)
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map(m => (
-                <option key={m.id} value={m.id}>{m.name}</option>
-              ))}
+            {sortedBrands.map(brand => (
+              <optgroup key={`m1-brand-${brand}`} label={brand}>
+                {groupedModels[brand].map(m => {
+                  const p = m.specs?.find(s => s.label === 'Potência')?.value;
+                  return (
+                    <option key={m.id} value={m.id}>{m.name} ({p})</option>
+                  );
+                })}
+              </optgroup>
+            ))}
           </select>
 
           {model1 && (
@@ -574,12 +613,16 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
             onChange={(e) => setModel2Id(e.target.value)}
           >
             <option value="">Selecione o modelo 2...</option>
-            {data.models
-              .filter(m => m.categoryId === 'motos-scooters' && m.released !== false)
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map(m => (
-                <option key={m.id} value={m.id}>{m.name}</option>
-              ))}
+            {sortedBrands.map(brand => (
+              <optgroup key={`m2-brand-${brand}`} label={brand}>
+                {groupedModels[brand].map(m => {
+                  const p = m.specs?.find(s => s.label === 'Potência')?.value;
+                  return (
+                    <option key={m.id} value={m.id}>{m.name} ({p})</option>
+                  );
+                })}
+              </optgroup>
+            ))}
           </select>
 
           {model2 && (
@@ -624,6 +667,28 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
                     </tr>
                   )
                 })}
+                {/* Dynamic Calculated Spec: Weight/Power Ratio */}
+                {(model1 || model2) && (
+                  <tr className="border-t border-zinc-200 hover:bg-zinc-50 transition-colors">
+                    <td className="p-3 sm:p-4 text-xs sm:text-sm font-medium text-zinc-500">Relação Peso/Potência</td>
+                    <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-900 bg-white/50">
+                      {(() => {
+                        if (!model1) return '-';
+                        const w = parseFloat(model1.specs.find(s => s.label === 'Peso')?.value.replace(',', '.').replace(/[^0-9.]/g, '') || '');
+                        const p = parseFloat(model1.specs.find(s => s.label === 'Potência')?.value.replace(',', '.').replace(/[^0-9.]/g, '') || '');
+                        return !isNaN(w) && !isNaN(p) && p > 0 ? `${(w / p).toFixed(2)} kg/cv` : '-';
+                      })()}
+                    </td>
+                    <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-900 bg-white/50 border-l border-zinc-200">
+                      {(() => {
+                        if (!model2) return '-';
+                        const w = parseFloat(model2.specs.find(s => s.label === 'Peso')?.value.replace(',', '.').replace(/[^0-9.]/g, '') || '');
+                        const p = parseFloat(model2.specs.find(s => s.label === 'Potência')?.value.replace(',', '.').replace(/[^0-9.]/g, '') || '');
+                        return !isNaN(w) && !isNaN(p) && p > 0 ? `${(w / p).toFixed(2)} kg/cv` : '-';
+                      })()}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
