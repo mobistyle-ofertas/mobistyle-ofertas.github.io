@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+// Force change for git synchronization
 import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
 import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy, ShoppingBag } from 'lucide-react';
