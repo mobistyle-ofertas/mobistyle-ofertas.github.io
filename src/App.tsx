@@ -1215,6 +1215,25 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
         if (a.id === 'capacetes') return -1;
         if (b.id === 'capacetes') return 1;
       }
+      if (categoryId === 'motos-scooters') {
+        const getCc = (model: Model) => {
+          const motorSpec = model.specs?.find(s => s.label === 'Motor');
+          if (!motorSpec) return 0;
+          return parseFloat(motorSpec.value.replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+        };
+        const getCv = (model: Model) => {
+          const potSpec = model.specs?.find(s => s.label === 'Potência');
+          if (!potSpec) return 0;
+          return parseFloat(potSpec.value.replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+        };
+        const ccA = getCc(a);
+        const ccB = getCc(b);
+        if (ccA !== ccB) return ccA - ccB;
+        
+        const cvA = getCv(a);
+        const cvB = getCv(b);
+        if (cvA !== cvB) return cvA - cvB;
+      }
       return a.name.localeCompare(b.name);
     });
 
@@ -1256,29 +1275,30 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
           <ChevronRight className="w-2.5 h-2.5" />
           <span className="text-zinc-900">{category.name}</span>
         </div>
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-display font-bold mb-2 tracking-tight">{category.name}</h1>
-            <p className="text-zinc-500 text-sm max-w-2xl">{category.description}</p>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-display font-bold mb-2 tracking-tight">{category.name}</h1>
+              <p className="text-zinc-500 text-sm max-w-2xl">{category.description}</p>
+            </div>
+            
+            <div className="flex justify-end shrink-0">
+              {categoryId === 'motos-scooters' && (
+                <Link 
+                  to="/comparador" 
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-zinc-800 transition-colors"
+                >
+                  Comparar Modelos
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              )}
+            </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-            {/* Compare Button */}
-            {categoryId === 'motos-scooters' && (
-              <Link 
-                to="/comparador" 
-                className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-zinc-800 transition-colors"
-              >
-                Comparar Modelos
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            )}
-
-            {/* Brand Filter */}
-            {brands.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  onClick={() => setSelectedBrand(null)}
+          {brands.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setSelectedBrand(null)}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
                   selectedBrand === null 
                     ? 'bg-zinc-900 text-white' 
@@ -1301,8 +1321,7 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
                 </button>
               ))}
             </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
