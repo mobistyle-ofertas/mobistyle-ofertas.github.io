@@ -442,7 +442,7 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
           .select('*')
           .eq('model_id', modelId)
           .order('price', { ascending: true })
-          .limit(4);
+          .limit(8);
 
         if (error) throw error;
 
@@ -479,7 +479,7 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
           .select('*')
           .eq('model_id', modelId)
           .order('price', { ascending: true })
-          .limit(4);
+          .limit(8);
 
         if (error) throw error;
 
@@ -729,7 +729,7 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
                         href={bike.url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="group bg-white border border-zinc-100 rounded-lg overflow-hidden hover:border-zinc-300 transition-all flex flex-col"
+                        className={`group bg-white border border-zinc-100 rounded-lg overflow-hidden hover:border-zinc-300 transition-all flex-col ${i >= 4 ? 'hidden md:flex' : 'flex'}`}
                       >
                         <div className="aspect-[4/3] overflow-hidden bg-zinc-50">
                           <img 
@@ -800,7 +800,7 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
                         href={bike.url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="group bg-white border border-zinc-100 rounded-lg overflow-hidden hover:border-zinc-300 transition-all flex flex-col"
+                        className={`group bg-white border border-zinc-100 rounded-lg overflow-hidden hover:border-zinc-300 transition-all flex-col ${i >= 4 ? 'hidden md:flex' : 'flex'}`}
                       >
                         <div className="aspect-[4/3] overflow-hidden bg-zinc-50">
                           <img 
