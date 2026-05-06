@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 // Force change for git synchronization
 import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
-import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy, ShoppingBag } from 'lucide-react';
+import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy, ShoppingBag, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 
 // Custom Brand Icons (removed from recent lucide-react versions)
 const Instagram = (props: any) => (
@@ -660,11 +660,68 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
                 {sortedSpecs.map(specName => {
                   const val1 = model1?.specs?.find(s => s.label === specName)?.value || '-';
                   const val2 = model2?.specs?.find(s => s.label === specName)?.value || '-';
+                  
+                  let better = 0;
+                  let margin = 'wide';
+                  if (val1 !== '-' && val2 !== '-') {
+                    const parseVal = (v: string) => {
+                      const match = v.match(/[\d,.]+/);
+                      return match ? parseFloat(match[0].replace(/\./g, '').replace(',', '.')) : NaN;
+                    };
+                    const n1 = parseVal(val1);
+                    const n2 = parseVal(val2);
+                    
+                    if (specName === 'Potência' || specName === 'Torque' || specName === 'Tanque' || specName === 'Motor') {
+                      if (!isNaN(n1) && !isNaN(n2) && n1 !== n2) {
+                        better = n1 > n2 ? 1 : 2;
+                        const winnerVal = better === 1 ? n1 : n2;
+                        if (Math.abs(n1 - n2) / winnerVal <= 0.1) margin = 'close';
+                      }
+                    } else if (specName === 'Peso') {
+                      if (!isNaN(n1) && !isNaN(n2) && n1 !== n2) {
+                        better = n1 < n2 ? 1 : 2;
+                        const winnerVal = better === 1 ? n1 : n2;
+                        if (Math.abs(n1 - n2) / winnerVal <= 0.1) margin = 'close';
+                      }
+                    } else if (specName === 'Freios') {
+                      const score = (f: string) => {
+                        let s = 0;
+                        const l = f.toLowerCase();
+                        if (l.includes('disco')) s += 10;
+                        if (l.includes('tambor')) s += 1;
+                        if (l.includes('abs')) s += 5;
+                        if (l.includes('cbs')) s += 2;
+                        return s;
+                      };
+                      const s1 = score(val1), s2 = score(val2);
+                      if (s1 !== s2) {
+                        better = s1 > s2 ? 1 : 2;
+                      }
+                    }
+                  }
+
+                  const isLoser1 = better === 2;
+                  const isLoser2 = better === 1;
+
                   return (
                     <tr key={specName} className="hover:bg-zinc-50 transition-colors">
                       <td className="p-3 sm:p-4 text-xs sm:text-sm font-medium text-zinc-700 bg-zinc-50/50">{specName}</td>
-                      <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-600 bg-white">{val1}</td>
-                      <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-600 bg-white border-l border-zinc-200">{val2}</td>
+                      <td className={`p-3 sm:p-4 text-xs sm:text-sm text-zinc-600 bg-white ${better === 1 ? 'text-green-600 font-bold' : isLoser1 ? (margin === 'close' ? 'text-yellow-600' : 'text-red-600') : ''}`}>
+                        <div className="flex items-center gap-1.5">
+                          {better === 1 && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                          {isLoser1 && margin === 'wide' && <XCircle className="w-4 h-4 text-red-500" />}
+                          {isLoser1 && margin === 'close' && <AlertCircle className="w-4 h-4 text-yellow-500" />}
+                          {val1}
+                        </div>
+                      </td>
+                      <td className={`p-3 sm:p-4 text-xs sm:text-sm text-zinc-600 bg-white border-l border-zinc-200 ${better === 2 ? 'text-green-600 font-bold' : isLoser2 ? (margin === 'close' ? 'text-yellow-600' : 'text-red-600') : ''}`}>
+                        <div className="flex items-center gap-1.5">
+                          {better === 2 && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                          {isLoser2 && margin === 'wide' && <XCircle className="w-4 h-4 text-red-500" />}
+                          {isLoser2 && margin === 'close' && <AlertCircle className="w-4 h-4 text-yellow-500" />}
+                          {val2}
+                        </div>
+                      </td>
                     </tr>
                   )
                 })}
@@ -672,22 +729,57 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
                 {(model1 || model2) && (
                   <tr className="border-t border-zinc-200 hover:bg-zinc-50 transition-colors">
                     <td className="p-3 sm:p-4 text-xs sm:text-sm font-medium text-zinc-500">Relação Peso/Potência</td>
-                    <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-900 bg-white/50">
-                      {(() => {
-                        if (!model1) return '-';
+                    {(() => {
+                      let r1 = NaN, r2 = NaN;
+                      let r1Str = '-', r2Str = '-';
+                      if (model1) {
                         const w = parseFloat(model1.specs.find(s => s.label === 'Peso')?.value.replace(',', '.').replace(/[^0-9.]/g, '') || '');
                         const p = parseFloat(model1.specs.find(s => s.label === 'Potência')?.value.replace(',', '.').replace(/[^0-9.]/g, '') || '');
-                        return !isNaN(w) && !isNaN(p) && p > 0 ? `${(w / p).toFixed(2)} kg/cv` : '-';
-                      })()}
-                    </td>
-                    <td className="p-3 sm:p-4 text-xs sm:text-sm text-zinc-900 bg-white/50 border-l border-zinc-200">
-                      {(() => {
-                        if (!model2) return '-';
+                        if (!isNaN(w) && !isNaN(p) && p > 0) {
+                          r1 = w / p;
+                          r1Str = `${r1.toFixed(2)} kg/cv`;
+                        }
+                      }
+                      if (model2) {
                         const w = parseFloat(model2.specs.find(s => s.label === 'Peso')?.value.replace(',', '.').replace(/[^0-9.]/g, '') || '');
                         const p = parseFloat(model2.specs.find(s => s.label === 'Potência')?.value.replace(',', '.').replace(/[^0-9.]/g, '') || '');
-                        return !isNaN(w) && !isNaN(p) && p > 0 ? `${(w / p).toFixed(2)} kg/cv` : '-';
-                      })()}
-                    </td>
+                        if (!isNaN(w) && !isNaN(p) && p > 0) {
+                          r2 = w / p;
+                          r2Str = `${r2.toFixed(2)} kg/cv`;
+                        }
+                      }
+                      let better = 0;
+                      let margin = 'wide';
+                      if (!isNaN(r1) && !isNaN(r2) && r1 !== r2) {
+                        better = r1 < r2 ? 1 : 2;
+                        const winnerVal = better === 1 ? r1 : r2;
+                        if (Math.abs(r1 - r2) / winnerVal <= 0.1) margin = 'close';
+                      }
+
+                      const isLoser1 = better === 2;
+                      const isLoser2 = better === 1;
+
+                      return (
+                        <>
+                          <td className={`p-3 sm:p-4 text-xs sm:text-sm text-zinc-900 bg-white/50 ${better === 1 ? 'text-green-600 font-bold' : isLoser1 ? (margin === 'close' ? 'text-yellow-600' : 'text-red-600') : ''}`}>
+                            <div className="flex items-center gap-1.5">
+                              {better === 1 && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                              {isLoser1 && margin === 'wide' && <XCircle className="w-4 h-4 text-red-500" />}
+                              {isLoser1 && margin === 'close' && <AlertCircle className="w-4 h-4 text-yellow-500" />}
+                              {r1Str}
+                            </div>
+                          </td>
+                          <td className={`p-3 sm:p-4 text-xs sm:text-sm text-zinc-900 bg-white/50 border-l border-zinc-200 ${better === 2 ? 'text-green-600 font-bold' : isLoser2 ? (margin === 'close' ? 'text-yellow-600' : 'text-red-600') : ''}`}>
+                            <div className="flex items-center gap-1.5">
+                              {better === 2 && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                              {isLoser2 && margin === 'wide' && <XCircle className="w-4 h-4 text-red-500" />}
+                              {isLoser2 && margin === 'close' && <AlertCircle className="w-4 h-4 text-yellow-500" />}
+                              {r2Str}
+                            </div>
+                          </td>
+                        </>
+                      );
+                    })()}
                   </tr>
                 )}
               </tbody>
