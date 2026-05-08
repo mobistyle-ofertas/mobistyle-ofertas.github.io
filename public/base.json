@@ -141,7 +141,7 @@
       "brand": "Royal Enfield",
       "name": "Royal Enfield Interceptor 650",
       "description": "O clássico bicilíndrico com alma britânica.",
-      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/royal-enfield-interceptor-650.jpg",
+      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/royal-enfield-interceptor-650.jpg?v=2",
       "specs": [ { "label": "Motor", "value": "648,0 cc" }, { "label": "Potência", "value": "47,0 cv" }, { "label": "Torque", "value": "5,3 kgf.m" }, { "label": "Peso", "value": "218 kg" }, { "label": "Tanque", "value": "13,7 L" }, { "label": "Câmbio", "value": "Manual (6 marchas)" }, { "label": "Freios", "value": "Disco (ABS)" }, { "label": "Altura do Assento", "value": "804 mm" } ]
     },
     {
@@ -159,7 +159,7 @@
       "brand": "Royal Enfield",
       "name": "Royal Enfield Super Meteor 650",
       "description": "A cruiser definitiva da Royal Enfield.",
-      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/royal-enfield-super-meteor-650.jpg",
+      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/royal-enfield-super-meteor-650.jpg?v=2",
       "specs": [ { "label": "Motor", "value": "648,0 cc" }, { "label": "Potência", "value": "47,0 cv" }, { "label": "Torque", "value": "5,3 kgf.m" }, { "label": "Peso", "value": "241 kg" }, { "label": "Tanque", "value": "15,7 L" }, { "label": "Câmbio", "value": "Manual (6 marchas)" }, { "label": "Freios", "value": "Disco (ABS)" }, { "label": "Altura do Assento", "value": "740 mm" } ]
     },
     {
@@ -258,7 +258,7 @@
       "brand": "Kymco",
       "name": "Kymco Downtown 350i",
       "description": "Maxiscooter esportiva com grande capacidade de carga.",
-      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/kymco-downtown-350i.jpg",
+      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/kymco-downtown-350i.jpg?v=2",
       "specs": [ { "label": "Motor", "value": "320,0 cc" }, { "label": "Potência", "value": "29,5 cv" }, { "label": "Torque", "value": "3,1 kgf.m" }, { "label": "Peso", "value": "189 kg" }, { "label": "Tanque", "value": "12,5 L" }, { "label": "Câmbio", "value": "Automático (CVT)" }, { "label": "Freios", "value": "Disco (ABS)" }, { "label": "Altura do Assento", "value": "812 mm" } ]
     },
     {
@@ -330,7 +330,7 @@
       "brand": "Bajaj",
       "name": "Bajaj Dominar 200",
       "description": "A naked que redefine o segmento de 200cc.",
-      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/bajaj-dominar-ns200.jpg",
+      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/bajaj-dominar-200.webp",
       "specs": [ { "label": "Motor", "value": "199,5 cc" }, { "label": "Potência", "value": "24,5 cv" }, { "label": "Torque", "value": "1,9 kgf.m" }, { "label": "Peso", "value": "157 kg" }, { "label": "Tanque", "value": "12,0 L" }, { "label": "Câmbio", "value": "Manual (6 marchas)" }, { "label": "Freios", "value": "Disco (ABS)" }, { "label": "Altura do Assento", "value": "805 mm" } ]
     },
     {
@@ -339,7 +339,7 @@
       "brand": "Bajaj",
       "name": "Bajaj Dominar 250",
       "description": "Equilíbrio perfeito entre potência e economia.",
-      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/bajaj-dominar-250.jpg",
+      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/bajaj-dominar-250.webp",
       "specs": [ { "label": "Motor", "value": "248,7 cc" }, { "label": "Potência", "value": "27,0 cv" }, { "label": "Torque", "value": "2,4 kgf.m" }, { "label": "Peso", "value": "180 kg" }, { "label": "Tanque", "value": "13,0 L" }, { "label": "Câmbio", "value": "Manual (6 marchas)" }, { "label": "Freios", "value": "Disco (ABS)" }, { "label": "Altura do Assento", "value": "800 mm" } ]
     },
     {
@@ -551,6 +551,14 @@
       "description": "Controles sem fio para jogos em smartphones, tablets e handhelds.",
       "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/joystick-bluetooth.jpg",
       "categorySearchUrl": "https://meli.la/15sNkUm"
+    },
+    {
+      "id": "drones",
+      "categoryId": "gadgets",
+      "name": "Drones",
+      "description": "Capture imagens incríveis e explore novos ângulos com os melhores drones.",
+      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/drones.jpg",
+      "categorySearchUrl": "https://meli.la/1fD1E7w"
     },
     {
       "id": "bomba-de-ar-eletrica",

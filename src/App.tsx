@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 // Force change for git synchronization
 import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
-import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy, ShoppingBag, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy, ShoppingBag, CheckCircle2, XCircle, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react';
 
 // Custom Brand Icons (removed from recent lucide-react versions)
 const Instagram = (props: any) => (
@@ -421,6 +421,125 @@ const Footer = ({ data }: { data: SiteData | null }) => (
   </footer>
 );
 
+const SearchableModelSelect = ({
+  value,
+  onChange,
+  placeholder,
+  groupedModels,
+  sortedBrands
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+  groupedModels: Record<string, any[]>;
+  sortedBrands: string[];
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const allFilteredOptions = useMemo(() => {
+    return sortedBrands.map(brand => {
+      const filtered = groupedModels[brand].filter(m => 
+        m.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      return { brand, models: filtered };
+    }).filter(group => group.models.length > 0);
+  }, [groupedModels, sortedBrands, searchTerm]);
+
+  let selectedModel = null;
+  for (const brand of sortedBrands) {
+    const found = groupedModels[brand].find(m => m.id === value);
+    if (found) {
+      selectedModel = found;
+      break;
+    }
+  }
+
+  return (
+    <div ref={wrapperRef} className="relative w-full">
+      <div 
+        className="w-full flex items-center border border-zinc-200 rounded-lg shadow-sm focus-within:border-zinc-900 focus-within:ring-1 focus-within:ring-zinc-900 bg-white px-3 py-2 cursor-text transition-colors"
+        onClick={() => setIsOpen(true)}
+      >
+        <div className="flex-1 overflow-hidden flex items-center min-h-[20px]">
+          {!isOpen && selectedModel ? (
+            <span className="text-xs sm:text-sm text-zinc-900 truncate">
+              {selectedModel.name} {selectedModel.specs?.find((s: any) => s.label === 'Potência')?.value ? `(${selectedModel.specs?.find((s: any) => s.label === 'Potência')?.value})` : ''}
+            </span>
+          ) : (
+            <input
+              className="w-full text-xs sm:text-sm bg-transparent outline-none m-0 p-0 text-zinc-900 placeholder:text-zinc-500"
+              placeholder={selectedModel ? `${selectedModel.name} ${selectedModel.specs?.find((s: any) => s.label === 'Potência')?.value ? `(${selectedModel.specs?.find((s: any) => s.label === 'Potência')?.value})` : ''}` : placeholder}
+              value={isOpen ? searchTerm : ''}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                if (!isOpen) setIsOpen(true);
+              }}
+              onFocus={() => setIsOpen(true)}
+            />
+          )}
+        </div>
+        <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0 ml-2" />
+      </div>
+
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-zinc-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+          <div className="py-1">
+             <button
+                className="w-full text-left px-3 py-2 text-xs sm:text-sm hover:bg-zinc-100 text-zinc-500 italic outline-none flex items-center"
+                onClick={() => {
+                  onChange('');
+                  setIsOpen(false);
+                  setSearchTerm('');
+                }}
+              >
+                {placeholder}
+              </button>
+            {allFilteredOptions.length === 0 ? (
+              <div className="px-3 py-4 text-sm text-center text-zinc-500">Nenhum modelo encontrado</div>
+            ) : (
+              allFilteredOptions.map(group => (
+                <div key={group.brand}>
+                  <div className="px-3 py-1.5 text-[11px] font-bold tracking-wider uppercase text-zinc-500 bg-zinc-50/50 sticky top-0 backdrop-blur-sm z-10">
+                    {group.brand}
+                  </div>
+                  {group.models.map(m => {
+                    const p = m.specs?.find((s: any) => s.label === 'Potência')?.value;
+                    return (
+                      <button
+                        key={m.id}
+                        className={`w-full text-left pl-6 pr-3 py-2.5 text-xs sm:text-sm hover:bg-zinc-100 focus:bg-zinc-100 outline-none transition-colors \${m.id === value ? 'bg-zinc-50 font-medium text-zinc-900' : 'text-zinc-700'}`}
+                        onClick={() => {
+                          onChange(m.id);
+                          setIsOpen(false);
+                          setSearchTerm('');
+                        }}
+                      >
+                        {m.name} {p ? <span className="text-zinc-400 font-normal ml-1">({p})</span> : null}
+                      </button>
+                    )
+                  })}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const CompareModels = ({ data }: { data: SiteData | null }) => {
   const [model1Id, setModel1Id] = useState<string>('');
   const [model2Id, setModel2Id] = useState<string>('');
@@ -571,23 +690,13 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
       <div className="grid grid-cols-2 gap-4 sm:gap-8 mb-12">
         {/* Model 1 Select */}
         <div>
-          <select
-            className="w-full border-zinc-200 rounded-lg shadow-sm focus:border-zinc-900 focus:ring-zinc-900 text-xs sm:text-sm"
+          <SearchableModelSelect
             value={model1Id}
-            onChange={(e) => setModel1Id(e.target.value)}
-          >
-            <option value="">Selecione o modelo 1...</option>
-            {sortedBrands.map(brand => (
-              <optgroup key={`m1-brand-${brand}`} label={brand}>
-                {groupedModels[brand].map(m => {
-                  const p = m.specs?.find(s => s.label === 'Potência')?.value;
-                  return (
-                    <option key={m.id} value={m.id}>{m.name} ({p})</option>
-                  );
-                })}
-              </optgroup>
-            ))}
-          </select>
+            onChange={(val) => setModel1Id(val)}
+            placeholder="Selecione o modelo 1..."
+            groupedModels={groupedModels}
+            sortedBrands={sortedBrands}
+          />
 
           {model1 && (
             <div className="mt-4 sm:mt-6 border border-zinc-200 rounded-2xl overflow-hidden bg-white">
@@ -608,23 +717,13 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
 
         {/* Model 2 Select */}
         <div>
-          <select
-            className="w-full border-zinc-200 rounded-lg shadow-sm focus:border-zinc-900 focus:ring-zinc-900 text-xs sm:text-sm"
+          <SearchableModelSelect
             value={model2Id}
-            onChange={(e) => setModel2Id(e.target.value)}
-          >
-            <option value="">Selecione o modelo 2...</option>
-            {sortedBrands.map(brand => (
-              <optgroup key={`m2-brand-${brand}`} label={brand}>
-                {groupedModels[brand].map(m => {
-                  const p = m.specs?.find(s => s.label === 'Potência')?.value;
-                  return (
-                    <option key={m.id} value={m.id}>{m.name} ({p})</option>
-                  );
-                })}
-              </optgroup>
-            ))}
-          </select>
+            onChange={(val) => setModel2Id(val)}
+            placeholder="Selecione o modelo 2..."
+            groupedModels={groupedModels}
+            sortedBrands={sortedBrands}
+          />
 
           {model2 && (
             <div className="mt-4 sm:mt-6 border border-zinc-200 rounded-2xl overflow-hidden bg-white">
@@ -1290,6 +1389,8 @@ const Home = ({ data }: { data: SiteData | null }) => {
 const CategoryPage = ({ data }: { data: SiteData | null }) => {
   const { categoryId } = useParams();
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'cilindrada' | 'potencia' | 'peso' | 'peso_potencia'>('cilindrada');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   
   if (!data) return null;
 
@@ -1319,13 +1420,39 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
           if (!potSpec) return 0;
           return parseFloat(potSpec.value.replace(',', '.').replace(/[^\d.]/g, '')) || 0;
         };
-        const ccA = getCc(a);
-        const ccB = getCc(b);
-        if (ccA !== ccB) return ccA - ccB;
-        
-        const cvA = getCv(a);
-        const cvB = getCv(b);
-        if (cvA !== cvB) return cvA - cvB;
+        const getPeso = (model: Model) => {
+          const pesoSpec = model.specs?.find(s => s.label === 'Peso');
+          if (!pesoSpec) return 0;
+          return parseFloat(pesoSpec.value.replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+        };
+
+        if (sortBy === 'cilindrada') {
+          const ccA = getCc(a);
+          const ccB = getCc(b);
+          if (ccA !== ccB) return sortOrder === 'asc' ? ccA - ccB : ccB - ccA;
+          
+          const cvA = getCv(a);
+          const cvB = getCv(b);
+          if (cvA !== cvB) return sortOrder === 'asc' ? cvA - cvB : cvB - cvA;
+        } else if (sortBy === 'potencia') {
+          const cvA = getCv(a);
+          const cvB = getCv(b);
+          if (cvA !== cvB) return sortOrder === 'asc' ? cvA - cvB : cvB - cvA;
+        } else if (sortBy === 'peso') {
+          const pesoA = getPeso(a);
+          const pesoB = getPeso(b);
+          if (pesoA !== pesoB) return sortOrder === 'asc' ? pesoA - pesoB : pesoB - pesoA;
+        } else if (sortBy === 'peso_potencia') {
+          const pesoA = getPeso(a);
+          const cvA = getCv(a);
+          const ppA = cvA > 0 ? pesoA / cvA : 0;
+          
+          const pesoB = getPeso(b);
+          const cvB = getCv(b);
+          const ppB = cvB > 0 ? pesoB / cvB : 0;
+          
+          if (ppA !== ppB) return sortOrder === 'asc' ? ppA - ppB : ppB - ppA;
+        }
       }
       return a.name.localeCompare(b.name);
     });
@@ -1389,30 +1516,56 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
           </div>
           
           {brands.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              <button
-                onClick={() => setSelectedBrand(null)}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
-                  selectedBrand === null 
-                    ? 'bg-zinc-900 text-white' 
-                    : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
-                }`}
-              >
-                Todas
-              </button>
-              {brands.map(brand => (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex flex-wrap gap-1.5">
                 <button
-                  key={brand}
-                  onClick={() => setSelectedBrand(brand)}
+                  onClick={() => setSelectedBrand(null)}
                   className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
-                    selectedBrand === brand 
+                    selectedBrand === null 
                       ? 'bg-zinc-900 text-white' 
                       : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
                   }`}
                 >
-                  {brand}
+                  Todas
                 </button>
-              ))}
+                {brands.map(brand => (
+                  <button
+                    key={brand}
+                    onClick={() => setSelectedBrand(brand)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                      selectedBrand === brand 
+                        ? 'bg-zinc-900 text-white' 
+                        : 'bg-zinc-100 text-zinc-500 hover:bg-zinc-200'
+                    }`}
+                  >
+                    {brand}
+                  </button>
+                ))}
+              </div>
+              
+              {categoryId === 'motos-scooters' && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <label htmlFor="sort" className="text-xs text-zinc-500 font-medium">Ordenar por:</label>
+                  <select
+                    id="sort"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="text-xs border-zinc-200 rounded-lg shadow-sm focus:border-zinc-900 focus:ring-zinc-900 py-1.5 pl-3 pr-8"
+                  >
+                    <option value="cilindrada">Cilindrada</option>
+                    <option value="potencia">Potência</option>
+                    <option value="peso">Peso</option>
+                    <option value="peso_potencia">Peso/Potência</option>
+                  </select>
+                  <button
+                    onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                    className="p-1 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors ml-1"
+                    title={sortOrder === 'asc' ? 'Crescente' : 'Decrescente'}
+                  >
+                    {sortOrder === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />}
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -1438,6 +1591,33 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
             </div>
             <div className={isMenuMode ? "p-2 text-center" : "p-4"}>
               <h3 className={`${isMenuMode ? 'text-xs' : 'text-sm'} font-bold mb-1 line-clamp-1`}>{model.name}</h3>
+              {categoryId === 'motos-scooters' && (
+                <div className="mb-2">
+                  {sortBy === 'cilindrada' && model.specs?.find(s => s.label === 'Motor') && (
+                    <span className="inline-block bg-zinc-100 text-zinc-600 text-[10px] px-2 py-0.5 rounded font-medium">
+                      Cilindrada: {model.specs.find(s => s.label === 'Motor')?.value}
+                    </span>
+                  )}
+                  {sortBy === 'potencia' && model.specs?.find(s => s.label === 'Potência') && (
+                    <span className="inline-block bg-zinc-100 text-zinc-600 text-[10px] px-2 py-0.5 rounded font-medium">
+                      Potência: {model.specs.find(s => s.label === 'Potência')?.value}
+                    </span>
+                  )}
+                  {sortBy === 'peso' && model.specs?.find(s => s.label === 'Peso') && (
+                    <span className="inline-block bg-zinc-100 text-zinc-600 text-[10px] px-2 py-0.5 rounded font-medium">
+                      Peso: {model.specs.find(s => s.label === 'Peso')?.value}
+                    </span>
+                  )}
+                  {sortBy === 'peso_potencia' && model.specs?.find(s => s.label === 'Peso') && model.specs?.find(s => s.label === 'Potência') && (
+                    <span className="inline-block bg-zinc-100 text-zinc-600 text-[10px] px-2 py-0.5 rounded font-medium">
+                      Peso/Potência: {(
+                        (parseFloat(model.specs.find(s => s.label === 'Peso')?.value.replace(',', '.').replace(/[^\d.]/g, '') || '0') || 0) /
+                        (parseFloat(model.specs.find(s => s.label === 'Potência')?.value.replace(',', '.').replace(/[^\d.]/g, '') || '0') || 1)
+                      ).toFixed(2).replace('.', ',')} kg/cv
+                    </span>
+                  )}
+                </div>
+              )}
               {!isMenuMode && (
                 <p className="text-zinc-500 text-[11px] mb-3 line-clamp-2 leading-snug">{model.description}</p>
               )}
@@ -2180,45 +2360,64 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
           )}
         </div>
 
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-display font-bold tracking-tight flex items-center gap-2">
-              <Tag className="w-5 h-5 text-zinc-900" /> Melhores Ofertas
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {model.affiliates.map((item, i) => (
-              <motion.div 
-                key={i} 
-                className="group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col"
-              >
-                <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
-                  <img 
-                    src={item.image} 
-                    alt={item.name} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div className="flex-grow space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">{item.store}</span>
-                  </div>
-                  <h3 className="text-[11px] font-bold text-zinc-800 line-clamp-2 leading-tight">{item.name}</h3>
-                  <div className="text-sm font-display font-bold text-zinc-900">{item.price}</div>
-                </div>
-                <a 
-                  href={item.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full mt-3 py-1.5 bg-zinc-900 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1.5 hover:bg-zinc-800 transition-colors"
+        {model.affiliates.length > 0 ? (
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-display font-bold tracking-tight flex items-center gap-2">
+                <Tag className="w-5 h-5 text-zinc-900" /> Melhores Ofertas
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {model.affiliates.map((item, i) => (
+                <motion.div 
+                  key={i} 
+                  className="group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col"
                 >
-                  Comprar <ExternalLink className="w-2.5 h-2.5" />
-                </a>
-              </motion.div>
-            ))}
-          </div>
-        </section>
+                  <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
+                    <img 
+                      src={item.image} 
+                      alt={item.name} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div className="flex-grow space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">{item.store}</span>
+                    </div>
+                    <h3 className="text-[11px] font-bold text-zinc-800 line-clamp-2 leading-tight">{item.name}</h3>
+                    <div className="text-sm font-display font-bold text-zinc-900">{item.price}</div>
+                  </div>
+                  <a 
+                    href={item.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full mt-3 py-1.5 bg-zinc-900 text-white text-[10px] font-bold rounded-lg flex items-center justify-center gap-1.5 hover:bg-zinc-800 transition-colors"
+                  >
+                    Comprar <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </motion.div>
+              ))}
+            </div>
+          </section>
+        ) : model.categorySearchUrl ? (
+          <section className="mb-12">
+            <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-8 text-center max-w-2xl mx-auto">
+              <Tag className="w-8 h-8 text-zinc-900 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Ofertas de {model.name}</h2>
+              <p className="text-zinc-500 mb-6 font-medium">Confira a seleção especial que preparamos no Mercado Livre com os melhores preços.</p>
+              <a 
+                href={model.categorySearchUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-zinc-200"
+              >
+                Ver ofertas no Mercado Livre
+                <ExternalLink className="w-4 h-4 text-zinc-400" />
+              </a>
+            </div>
+          </section>
+        ) : null}
 
         {randomCategoryOffers && randomCategoryOffers.offers.length > 0 && (
           <div className="mt-20 pt-12 border-t border-zinc-200">
@@ -2511,7 +2710,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
         </div>
 
         {/* Fim: Melhores Ofertas & Acessórios (Grade Maior) */}
-        {model.affiliates.length > 0 && (
+        {model.affiliates.length > 0 ? (
           <section className="mt-12 pt-8 border-t border-zinc-100">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-display font-bold tracking-tight flex items-center gap-2">
@@ -2551,7 +2750,24 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
               ))}
             </div>
           </section>
-        )}
+        ) : model.categorySearchUrl ? (
+          <section className="mt-12 pt-8 border-t border-zinc-100">
+            <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-8 text-center max-w-2xl mx-auto">
+              <Tag className="w-8 h-8 text-zinc-900 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold mb-2">Ofertas de {model.name}</h2>
+              <p className="text-zinc-500 mb-6 font-medium">Confira a seleção especial que preparamos no Mercado Livre com os melhores preços e acessórios.</p>
+              <a 
+                href={model.categorySearchUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-zinc-900 text-white rounded-xl font-bold hover:bg-zinc-800 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-zinc-200"
+              >
+                Ver ofertas no Mercado Livre
+                <ExternalLink className="w-4 h-4 text-zinc-400" />
+              </a>
+            </div>
+          </section>
+        ) : null}
 
       {randomCategoryOffers && randomCategoryOffers.offers.length > 0 && (
         <div className="mt-16 pt-8 border-t border-zinc-100">
