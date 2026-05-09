@@ -561,6 +561,14 @@
       "categorySearchUrl": "https://meli.la/1fD1E7w"
     },
     {
+      "id": "mesas-digitalizadoras",
+      "categoryId": "gadgets",
+      "name": "Mesas Digitalizadoras DeX",
+      "description": "Crie e desenhe com precisão usando mesas digitalizadoras compatíveis com DeX.",
+      "image": "https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/tablets.jpg",
+      "categorySearchUrl": "https://meli.la/1dPwAQs"
+    },
+    {
       "id": "bomba-de-ar-eletrica",
       "categoryId": "equipamentos",
       "name": "Bomba de Ar Elétrica",
