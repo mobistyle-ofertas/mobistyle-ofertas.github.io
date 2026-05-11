@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 // Force change for git synchronization
 import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
-import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy, ShoppingBag, CheckCircle2, XCircle, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react';
+import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy, ShoppingBag, CheckCircle2, XCircle, AlertCircle, ArrowUp, ArrowDown, Search } from 'lucide-react';
 
 // Custom Brand Icons (removed from recent lucide-react versions)
 const Instagram = (props: any) => (
@@ -1681,6 +1681,7 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
 const NewsList = ({ data }: { data: SiteData | null }) => {
   const [visibleCount, setVisibleCount] = useState(12);
   const [allNews, setAllNews] = useState<NewsItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
   
   const selectedCategory = new URLSearchParams(location.search).get('category');
@@ -1715,9 +1716,14 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
   }, [data]);
 
   const categories = Array.from(new Set(allNews.map(n => n.category).filter(Boolean))) as string[];
-  const filteredNews = selectedCategory 
-    ? allNews.filter(n => n.category === selectedCategory)
-    : allNews;
+  const filteredNews = allNews.filter(n => {
+    const matchesCategory = selectedCategory ? n.category === selectedCategory : true;
+    const matchesSearch = searchTerm 
+      ? n.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        n.content.toLowerCase().includes(searchTerm.toLowerCase())
+      : true;
+    return matchesCategory && matchesSearch;
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -1760,7 +1766,7 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
         <meta property="twitter:description" content={pageDesc} />
         <meta property="twitter:image" content={`https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/sobre.png`} />
       </Helmet>
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+      <div className="flex flex-col gap-6 mb-8">
         <div>
           <h1 className="text-3xl font-display font-bold mb-2 tracking-tight">Todas as Notícias</h1>
           <p className="text-zinc-500 text-sm">Fique por dentro das novidades do mundo das duas rodas.</p>
@@ -1792,10 +1798,23 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
             </Link>
           ))}
         </div>
+
+        {/* Search Bar */}
+        <div className="relative w-full sm:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+          <input
+            type="text"
+            placeholder="Pesquisar notícias..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        {filteredNews.slice(0, visibleCount).map((news, idx) => (
+        {filteredNews.length > 0 ? (
+          filteredNews.slice(0, visibleCount).map((news, idx) => (
           <motion.div 
             key={idx}
             initial={{ opacity: 0 }}
@@ -1857,14 +1876,15 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
               </div>
             </Link>
           </motion.div>
-        ))}
+          ))
+        ) : (
+          <div className="col-span-1 sm:col-span-3 lg:col-span-4 flex flex-col items-center justify-center text-center py-16 bg-white border border-zinc-100 rounded-xl">
+            <Search className="w-8 h-8 text-zinc-300 mb-3" />
+            <h3 className="text-sm font-bold text-zinc-900 mb-1">Nenhuma notícia encontrada</h3>
+            <p className="text-xs text-zinc-500">Tente buscar por outros termos ou categorias.</p>
+          </div>
+        )}
       </div>
-      
-      {filteredNews.length === 0 && (
-        <div className="py-20 text-center">
-          <p className="text-zinc-400">Nenhuma notícia encontrada nesta categoria.</p>
-        </div>
-      )}
 
       {visibleCount < filteredNews.length && (
         <div className="mt-12 text-center text-zinc-400 animate-pulse">
