@@ -1395,9 +1395,28 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
   if (!data) return null;
 
   const category = data.categories.find(c => c.id === categoryId);
-  const allModelsInCategory = data.models.filter(m => 
+  const allModelsInCategory = useMemo(() => data.models.filter(m => 
     m.categoryId === categoryId && m.released !== false && ((m.affiliates?.length || 0) > 0 || (m.usedBikes?.length || 0) > 0 || !!m.categorySearchUrl)
-  );
+  ).map(model => {
+    let displayImage = model.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/${model.id}.jpg`;
+    const isEqOrGadget = categoryId === 'equipamentos' || categoryId === 'gadgets';
+    if (isEqOrGadget) {
+      const products = [...(model.affiliates || []), ...(model.usedBikes || [])];
+      if (products.length > 0) {
+        // Deterministic random using sum of model id chars so it doesnt flicker
+        const hash = model.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const randomIndex = hash % products.length;
+        displayImage = products[randomIndex].image || displayImage;
+      } else {
+        const svgContent = categoryId === 'gadgets' 
+          ? '<rect x="2" y="6" width="20" height="12" rx="2" ry="2"/><line x1="7" y1="6" x2="7" y2="18"/><line x1="17" y1="6" x2="17" y2="18"/><circle cx="4.5" cy="10.5" r="1"/><path d="M4.5 13.5v2M3.5 14.5h2"/><circle cx="19.5" cy="13.5" r="1"/><circle cx="19.5" cy="9.5" r="0.5"/><circle cx="18.5" cy="10.5" r="0.5"/><circle cx="20.5" cy="10.5" r="0.5"/><circle cx="19.5" cy="11.5" r="0.5"/>'
+          : '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M9 12l2 2 4-4"/>';
+        const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="%23a1a1aa" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${svgContent}</svg>`;
+        displayImage = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400"><rect x="0" y="0" width="400" height="400" fill="%23f4f4f5"/><g transform="translate(100,100)">${svgIcon}</g></svg>`;
+      }
+    }
+    return { ...model, displayImage };
+  }), [data, categoryId]);
   
   // Extract unique brands for filtering
   const brands = Array.from(new Set(allModelsInCategory.map(m => m.brand).filter(Boolean))) as string[];
@@ -1583,9 +1602,9 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
           >
             <div className={`${isMenuMode ? 'aspect-square rounded-lg' : 'aspect-[4/3]'} bg-zinc-50 flex items-center justify-center overflow-hidden`}>
               <img 
-                src={model.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/${model.id}.jpg`} 
+                src={(model as any).displayImage || model.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/${model.id}.jpg`} 
                 alt={model.name}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className={`w-full h-full group-hover:scale-105 transition-transform duration-500 ${isMenuMode ? 'object-contain p-4 mix-blend-multiply' : 'object-cover'}`}
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -2006,8 +2025,9 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
     if (!data) return null;
     
     // Filter models that are "subcategories" of equipment and have offers
+    // AND ALSO exclude any modelIds related to this news
     const equipmentSubcategories = data.models.filter(m => 
-      m.categoryId === 'equipamentos' && m.affiliates.length > 0 && m.released !== false
+      m.categoryId === 'equipamentos' && m.affiliates.length > 0 && m.released !== false && !(news?.modelIds?.includes(m.id))
     );
 
     if (equipmentSubcategories.length === 0) return null;
@@ -2015,12 +2035,12 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
     // Pick a random subcategory (model)
     const randomSub = equipmentSubcategories[Math.floor(Math.random() * equipmentSubcategories.length)];
     
-    // Shuffle and take 6
+    // Shuffle and take 5
     const shuffled = [...randomSub.affiliates].sort(() => 0.5 - Math.random());
     return {
       id: randomSub.id,
       name: randomSub.name,
-      offers: shuffled.slice(0, 6)
+      offers: shuffled.slice(0, 5)
     };
   }, [data, newsId]);
 
@@ -2136,8 +2156,8 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                   <img 
                     src={model.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/${model.id}.jpg`} 
                     alt={model.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
+                      referrerPolicy="no-referrer"
                   />
                 </div>
                 <div>
@@ -2155,21 +2175,21 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold tracking-tight">Ofertas em {randomCategoryOffers.name}</h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {randomCategoryOffers.offers.map((offer, i) => (
               <a 
                 key={i} 
                 href={offer.url} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col"
+                className={`group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex-col ${i === 4 ? 'hidden lg:flex' : 'flex'}`}
               >
                 <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
                   <img 
                     src={offer.image} 
                     alt={offer.name} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
+                      referrerPolicy="no-referrer"
                   />
                 </div>
                 <div className="flex-grow">
@@ -2177,7 +2197,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                   <h3 className="text-[11px] font-bold line-clamp-2 mb-1 group-hover:text-zinc-700 transition-colors leading-tight">{offer.name}</h3>
                 </div>
                 <div className="mt-2 flex items-center justify-between">
-                  <span className="text-xs font-display font-bold text-zinc-900">{offer.price}</span>
+                  <span className="text-xs font-display font-bold text-zinc-900">{formatPrice(offer.price)}</span>
                   <ExternalLink className="w-2.5 h-2.5 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
                 </div>
               </a>
@@ -2296,8 +2316,9 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
     if (!data) return null;
     
     // Filter models that are "subcategories" of equipment and have offers
+    // AND ALSO exclude the current modelId
     const equipmentSubcategories = data.models.filter(m => 
-      m.categoryId === 'equipamentos' && m.affiliates.length > 0 && m.released !== false
+      m.categoryId === 'equipamentos' && m.affiliates.length > 0 && m.released !== false && m.id !== modelId
     );
 
     if (equipmentSubcategories.length === 0) return null;
@@ -2305,12 +2326,12 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
     // Pick a random subcategory (model)
     const randomSub = equipmentSubcategories[Math.floor(Math.random() * equipmentSubcategories.length)];
     
-    // Shuffle and take 6
+    // Shuffle and take 5
     const shuffled = [...randomSub.affiliates].sort(() => 0.5 - Math.random());
     return {
       id: randomSub.id,
       name: randomSub.name,
-      offers: shuffled.slice(0, 6)
+      offers: shuffled.slice(0, 5)
     };
   }, [data, modelId]);
 
@@ -2397,7 +2418,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                     <img 
                       src={item.image} 
                       alt={item.name} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
                     />
                   </div>
@@ -2406,7 +2427,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                       <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">{item.store}</span>
                     </div>
                     <h3 className="text-[11px] font-bold text-zinc-800 line-clamp-2 leading-tight">{item.name}</h3>
-                    <div className="text-sm font-display font-bold text-zinc-900">{item.price}</div>
+                    <div className="text-sm font-display font-bold text-zinc-900">{formatPrice(item.price)}</div>
                   </div>
                   <a 
                     href={item.url} 
@@ -2445,20 +2466,20 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
               <h2 className="text-2xl font-bold">Ofertas em {randomCategoryOffers.name}</h2>
               <div className="h-px flex-grow ml-8 bg-zinc-100"></div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {randomCategoryOffers.offers.map((offer, i) => (
                 <a 
                   key={i} 
                   href={offer.url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="group bg-white p-4 rounded-2xl border border-zinc-100 hover:border-zinc-900 transition-all flex flex-col"
+                  className={`group bg-white p-4 rounded-2xl border border-zinc-100 hover:border-zinc-900 transition-all flex-col ${i === 4 ? 'hidden lg:flex' : 'flex'}`}
                 >
                   <div className="aspect-square rounded-xl overflow-hidden mb-4 bg-zinc-50">
                     <img 
                       src={offer.image} 
                       alt={offer.name} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
                     />
                   </div>
@@ -2467,7 +2488,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                     <h3 className="text-xs font-bold line-clamp-2 mb-2 group-hover:text-zinc-700 transition-colors">{offer.name}</h3>
                   </div>
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-sm font-display font-bold text-zinc-900">{offer.price}</span>
+                    <span className="text-sm font-display font-bold text-zinc-900">{formatPrice(offer.price)}</span>
                     <ExternalLink className="w-3 h-3 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
                   </div>
                 </a>
@@ -2747,7 +2768,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                     <img 
                       src={item.image} 
                       alt={item.name} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
                     />
                   </div>
@@ -2756,7 +2777,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                       <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">{item.store}</span>
                     </div>
                     <h3 className="text-[11px] font-bold text-zinc-800 line-clamp-2 leading-tight">{item.name}</h3>
-                    <div className="text-sm font-display font-bold text-zinc-900">{item.price}</div>
+                    <div className="text-sm font-display font-bold text-zinc-900">{formatPrice(item.price)}</div>
                   </div>
                   <a 
                     href={item.url} 
@@ -2794,21 +2815,21 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold tracking-tight">Ofertas em {randomCategoryOffers.name}</h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {randomCategoryOffers.offers.map((offer, i) => (
               <a 
                 key={i} 
                 href={offer.url} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col"
+                className={`group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex-col ${i === 4 ? 'hidden lg:flex' : 'flex'}`}
               >
                 <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
                   <img 
                     src={offer.image} 
                     alt={offer.name} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
+                      referrerPolicy="no-referrer"
                   />
                 </div>
                 <div className="flex-grow">
@@ -2816,7 +2837,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                   <h3 className="text-[11px] font-bold line-clamp-2 mb-1 group-hover:text-zinc-700 transition-colors leading-tight">{offer.name}</h3>
                 </div>
                 <div className="mt-2 flex items-center justify-between">
-                  <span className="text-xs font-display font-bold text-zinc-900">{offer.price}</span>
+                  <span className="text-xs font-display font-bold text-zinc-900">{formatPrice(offer.price)}</span>
                   <ExternalLink className="w-2.5 h-2.5 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
                 </div>
               </a>
@@ -2827,6 +2848,17 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
       </div>
     </motion.div>
   );
+};
+
+const formatPrice = (price: string | number) => {
+  if (!price) return price;
+  if (typeof price === 'string' && price.toLowerCase().includes('r$')) return price;
+  
+  const numPrice = Number(price);
+  if (!isNaN(numPrice) && numPrice > 0) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(numPrice);
+  }
+  return price;
 };
 
 export default function App() {
