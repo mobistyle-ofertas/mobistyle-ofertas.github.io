@@ -1396,7 +1396,7 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
 
   const category = data.categories.find(c => c.id === categoryId);
   const allModelsInCategory = useMemo(() => data.models.filter(m => 
-    m.categoryId === categoryId && m.released !== false && ((m.affiliates?.length || 0) > 0 || (m.usedBikes?.length || 0) > 0 || !!m.categorySearchUrl)
+    (m.categoryId === categoryId || (categoryId === 'equipamentos' && m.id === 'smart-tags')) && m.released !== false && ((m.affiliates?.length || 0) > 0 || (m.usedBikes?.length || 0) > 0 || !!m.categorySearchUrl)
   ).map(model => {
     let displayImage = model.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/${model.id}.jpg`;
     const isEqOrGadget = categoryId === 'equipamentos' || categoryId === 'gadgets';
@@ -1408,7 +1408,7 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
         const randomIndex = hash % products.length;
         displayImage = products[randomIndex].image || displayImage;
       } else {
-        const svgContent = categoryId === 'gadgets' 
+        const svgContent = (categoryId === 'gadgets' || model.id === 'smart-tags')
           ? '<rect x="2" y="6" width="20" height="12" rx="2" ry="2"/><line x1="7" y1="6" x2="7" y2="18"/><line x1="17" y1="6" x2="17" y2="18"/><circle cx="4.5" cy="10.5" r="1"/><path d="M4.5 13.5v2M3.5 14.5h2"/><circle cx="19.5" cy="13.5" r="1"/><circle cx="19.5" cy="9.5" r="0.5"/><circle cx="18.5" cy="10.5" r="0.5"/><circle cx="20.5" cy="10.5" r="0.5"/><circle cx="19.5" cy="11.5" r="0.5"/>'
           : '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M9 12l2 2 4-4"/>';
         const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="%23a1a1aa" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">${svgContent}</svg>`;
@@ -2172,8 +2172,14 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
 
       {randomCategoryOffers && randomCategoryOffers.offers.length > 0 && (
         <div className="mt-12 pt-8 border-t border-zinc-100">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold tracking-tight">Ofertas em {randomCategoryOffers.name}</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h2 className="text-xl font-bold tracking-tight">Veja também ofertas em {randomCategoryOffers.name}</h2>
+            <Link 
+              to={`/model/${randomCategoryOffers.id}`}
+              className="text-xs font-bold bg-zinc-100 hover:bg-zinc-200 text-zinc-900 px-4 py-2 rounded-lg transition-colors flex items-center justify-center shrink-0 w-full sm:w-auto text-center"
+            >
+              Veja mais ofertas em {randomCategoryOffers.name}
+            </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {randomCategoryOffers.offers.map((offer, i) => (
@@ -2492,7 +2498,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
         {randomCategoryOffers && randomCategoryOffers.offers.length > 0 && (
           <div className="mt-20 pt-12 border-t border-zinc-200">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">Ofertas em {randomCategoryOffers.name}</h2>
+              <h2 className="text-2xl font-bold">Veja também ofertas em {randomCategoryOffers.name}</h2>
               <div className="h-px flex-grow ml-8 bg-zinc-100"></div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -2859,7 +2865,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
       {randomCategoryOffers && randomCategoryOffers.offers.length > 0 && (
         <div className="mt-16 pt-8 border-t border-zinc-100">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold tracking-tight">Ofertas em {randomCategoryOffers.name}</h2>
+            <h2 className="text-xl font-bold tracking-tight">Veja também ofertas em {randomCategoryOffers.name}</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {randomCategoryOffers.offers.map((offer, i) => (
