@@ -2131,9 +2131,68 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
         </div>
 
         <div className="prose prose-zinc prose-base md:prose-lg max-w-none mb-12">
-          <ReactMarkdown>
-            {(news.content || '').replace(/\\n/g, '\n')}
-          </ReactMarkdown>
+          {(() => {
+            const text = (news.content || '').replace(/\\n/g, '\n');
+            const parts = text.split(/(\[ofertas:[a-zA-Z0-9_-]+\])/g);
+            return parts.map((part, index) => {
+              const match = part.match(/\[ofertas:([a-zA-Z0-9_-]+)\]/);
+              if (match) {
+                const embeddedModelId = match[1];
+                const embeddedModel = data.models.find(m => m.id === embeddedModelId);
+                if (embeddedModel && embeddedModel.affiliates && embeddedModel.affiliates.length > 0) {
+                  return (
+                    <div key={index} className="my-10 not-prose bg-zinc-50 rounded-2xl p-6 border border-zinc-100">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <h3 className="text-xl font-bold tracking-tight flex items-center gap-2 m-0">
+                          <Tag className="w-5 h-5 text-zinc-900" /> Melhores ofertas em {embeddedModel.name}
+                        </h3>
+                        <Link to={`/model/${embeddedModel.id}`} className="text-xs font-bold bg-white border border-zinc-200 hover:border-zinc-900 text-zinc-900 px-4 py-2 rounded-lg transition-colors flex items-center justify-center shrink-0">
+                          Veja mais <ArrowRight className="w-3 h-3 ml-1" />
+                        </Link>
+                      </div>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        {embeddedModel.affiliates.slice(0, 4).map((offer, i) => (
+                          <a 
+                            key={i} 
+                            href={offer.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col"
+                          >
+                            <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50 relative">
+                              {offer.discount && (
+                                <div className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10">
+                                  {offer.discount}
+                                </div>
+                              )}
+                              <img 
+                                src={offer.image} 
+                                alt={offer.name} 
+                                className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
+                                referrerPolicy="no-referrer"
+                              />
+                            </div>
+                            <div className="flex-grow flex flex-col justify-between">
+                              <div>
+                                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest block mb-1">{offer.store}</span>
+                                <h3 className="text-[11px] font-bold line-clamp-2 mb-2 group-hover:text-zinc-700 transition-colors leading-tight">{offer.name}</h3>
+                              </div>
+                              <div className="mt-1 flex items-center justify-between">
+                                <span className="text-sm font-display font-bold text-zinc-900">{formatPrice(offer.price)}</span>
+                                <ExternalLink className="w-3 h-3 text-zinc-300 group-hover:text-zinc-900 transition-colors" />
+                              </div>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              }
+              return <ReactMarkdown key={index}>{part}</ReactMarkdown>;
+            });
+          })()}
         </div>
 
         <div className="flex flex-col items-center gap-4 py-8 border-y border-zinc-100 mb-12">
