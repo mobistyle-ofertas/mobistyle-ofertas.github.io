@@ -2302,10 +2302,22 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
 const ModelPage = ({ data }: { data: SiteData | null }) => {
   const { modelId } = useParams();
   const [newsLimit, setNewsLimit] = useState(3);
+  const [offerSortOrder, setOfferSortOrder] = useState<'asc' | 'desc' | null>(null);
+
   if (!data) return null;
 
   const model = data.models.find(m => m.id === modelId);
   if (!model) return <div className="p-20 text-center">Modelo não encontrado.</div>;
+
+  const sortedAffiliates = useMemo(() => {
+    if (!model.affiliates) return [];
+    if (!offerSortOrder) return model.affiliates;
+    return [...model.affiliates].sort((a, b) => {
+      const pa = parsePriceForSort(a.price);
+      const pb = parsePriceForSort(b.price);
+      return offerSortOrder === 'asc' ? pa - pb : pb - pa;
+    });
+  }, [model.affiliates, offerSortOrder]);
 
   const isMotoOrScooter = model.categoryId === 'motos-scooters';
   const visibleNews = [...model.news]
@@ -2403,13 +2415,30 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
 
         {model.affiliates.length > 0 ? (
           <section className="mb-12">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <h2 className="text-xl font-display font-bold tracking-tight flex items-center gap-2">
                 <Tag className="w-5 h-5 text-zinc-900" /> Melhores Ofertas
               </h2>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">Ordenar:</span>
+                <div className="flex bg-zinc-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => setOfferSortOrder(null)}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${!offerSortOrder ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >Padrão</button>
+                  <button
+                    onClick={() => setOfferSortOrder('asc')}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${offerSortOrder === 'asc' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >Menor Preço</button>
+                  <button
+                    onClick={() => setOfferSortOrder('desc')}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${offerSortOrder === 'desc' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >Maior Preço</button>
+                </div>
+              </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {model.affiliates.map((item, i) => (
+              {sortedAffiliates.map((item, i) => (
                 <motion.div 
                   key={i} 
                   className="group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col"
@@ -2753,13 +2782,30 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
         {/* Fim: Melhores Ofertas & Acessórios (Grade Maior) */}
         {model.affiliates.length > 0 ? (
           <section className="mt-12 pt-8 border-t border-zinc-100">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <h2 className="text-2xl font-display font-bold tracking-tight flex items-center gap-2">
                 <Tag className="w-6 h-6 text-zinc-900" /> Melhores Ofertas & Acessórios
               </h2>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">Ordenar:</span>
+                <div className="flex bg-zinc-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => setOfferSortOrder(null)}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${!offerSortOrder ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >Padrão</button>
+                  <button
+                    onClick={() => setOfferSortOrder('asc')}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${offerSortOrder === 'asc' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >Menor Preço</button>
+                  <button
+                    onClick={() => setOfferSortOrder('desc')}
+                    className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${offerSortOrder === 'desc' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}
+                  >Maior Preço</button>
+                </div>
+              </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-              {model.affiliates.map((item, i) => (
+              {sortedAffiliates.map((item, i) => (
                 <motion.div 
                   key={i} 
                   className="group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col"
@@ -2848,6 +2894,21 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
       </div>
     </motion.div>
   );
+};
+
+
+const parsePriceForSort = (price: any) => {
+  if (!price) return 0;
+  if (typeof price === 'number') return price;
+  if (typeof price === 'string') {
+    const strLower = price.toLowerCase();
+    if (strLower.includes('r$')) {
+      const cleanStr = price.replace(/[R$ \.]/g, '').replace(',', '.');
+      return Number(cleanStr) || 0;
+    }
+    return Number(price) || 0;
+  }
+  return 0;
 };
 
 const formatPrice = (price: string | number) => {
