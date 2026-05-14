@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
+Disallow: /backlog.md
 Sitemap: https://mobistyle-ofertas.github.io/sitemap.xml
