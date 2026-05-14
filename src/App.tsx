@@ -2392,16 +2392,16 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
   const randomCategoryOffers = useMemo(() => {
     if (!data) return null;
     
-    // Filter models that are "subcategories" of equipment and have offers
+    // Filter models that are "subcategories" of the current category and have offers
     // AND ALSO exclude the current modelId
-    const equipmentSubcategories = data.models.filter(m => 
-      m.categoryId === 'equipamentos' && m.affiliates.length > 0 && m.released !== false && m.id !== modelId
+    const sameCategoryModels = data.models.filter(m => 
+      m.categoryId === model.categoryId && (m.affiliates?.length || 0) > 0 && m.released !== false && m.id !== modelId
     );
 
-    if (equipmentSubcategories.length === 0) return null;
+    if (sameCategoryModels.length === 0) return null;
 
     // Pick a random subcategory (model)
-    const randomSub = equipmentSubcategories[Math.floor(Math.random() * equipmentSubcategories.length)];
+    const randomSub = sameCategoryModels[Math.floor(Math.random() * sameCategoryModels.length)];
     
     // Shuffle and take 5
     const shuffled = [...randomSub.affiliates].sort(() => 0.5 - Math.random());
@@ -2410,7 +2410,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
       name: randomSub.name,
       offers: shuffled.slice(0, 5)
     };
-  }, [data, modelId]);
+  }, [data, modelId, model.categoryId]);
 
   // Structured Data (JSON-LD)
   const structuredData = {
