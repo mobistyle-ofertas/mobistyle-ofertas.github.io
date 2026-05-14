@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Tire -->
+  <path fill="#09090b" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 432c-97.2 0-176-78.8-176-176S158.8 80 256 80s176 78.8 176 176-78.8 176-176 176z"/>
+  <!-- Inner Rim -->
+  <path fill="#09090b" d="M256 112c-79.5 0-144 64.5-144 144s64.5 144 144 144 144-64.5 144-144-64.5-144-144-144zM256 368c-61.9 0-112-50.1-112-112S194.1 144 256 144s112 50.1 112 112-50.1 112-112 112z"/>
+  <!-- Central Hub -->
+  <circle cx="256" cy="256" r="48" fill="#09090b"/>
+  <!-- Spokes -->
+  <!-- Vertical and Horizontal -->
+  <line x1="256" y1="144" x2="256" y2="240" stroke="#09090b" stroke-width="24" stroke-linecap="round"/>
+  <line x1="256" y1="272" x2="256" y2="368" stroke="#09090b" stroke-width="24" stroke-linecap="round"/>
+  <line x1="144" y1="256" x2="240" y2="256" stroke="#09090b" stroke-width="24" stroke-linecap="round"/>
+  <line x1="272" y1="256" x2="368" y2="256" stroke="#09090b" stroke-width="24" stroke-linecap="round"/>
+  <!-- Diagonal -->
+  <line x1="177" y1="177" x2="231" y2="231" stroke="#09090b" stroke-width="24" stroke-linecap="round"/>
+  <line x1="335" y1="335" x2="281" y2="281" stroke="#09090b" stroke-width="24" stroke-linecap="round"/>
+  <line x1="335" y1="177" x2="281" y2="231" stroke="#09090b" stroke-width="24" stroke-linecap="round"/>
+  <line x1="177" y1="335" x2="231" y2="281" stroke="#09090b" stroke-width="24" stroke-linecap="round"/>
+  <!-- Inner rim edge holes for extra moto styling -->
+  <circle cx="160" cy="256" r="10" fill="#ffffff"/>
+  <circle cx="352" cy="256" r="10" fill="#ffffff"/>
+  <circle cx="256" cy="160" r="10" fill="#ffffff"/>
+  <circle cx="256" cy="352" r="10" fill="#ffffff"/>
+  <circle cx="188" cy="188" r="10" fill="#ffffff"/>
+  <circle cx="324" cy="188" r="10" fill="#ffffff"/>
+  <circle cx="188" cy="324" r="10" fill="#ffffff"/>
+  <circle cx="324" cy="324" r="10" fill="#ffffff"/>
+</svg>
