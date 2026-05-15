@@ -1250,7 +1250,7 @@ const Home = ({ data }: { data: SiteData | null }) => {
                 className="group bg-white rounded-2xl overflow-hidden border border-zinc-100 hover:border-zinc-200 transition-all"
               >
                 <Link to={`/noticia/${news.id}`} className="flex sm:block items-center">
-                  <div className="w-24 h-24 sm:w-full sm:aspect-[16/9] overflow-hidden bg-zinc-50 flex-shrink-0">
+                  <div className="w-24 h-24 sm:w-full sm:h-48 overflow-hidden bg-zinc-50 flex-shrink-0">
                     <img 
                       src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
                       alt={news.title} 
