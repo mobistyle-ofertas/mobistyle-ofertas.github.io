@@ -1831,18 +1831,20 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 lg:auto-rows-[minmax(0,1fr)]">
         {filteredNews.length > 0 ? (
-          filteredNews.slice(0, visibleCount).map((news, idx) => (
+          filteredNews.slice(0, visibleCount).map((news, idx) => {
+            const isFeatured = idx === 0;
+            return (
           <motion.div 
             key={idx}
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="group bg-white rounded-xl overflow-hidden border border-zinc-100 hover:border-zinc-200 transition-all"
+            className={`group bg-white rounded-xl overflow-hidden border border-zinc-100 hover:border-zinc-200 transition-all flex flex-col ${isFeatured ? 'sm:col-span-2 md:col-span-2 lg:col-span-2 sm:row-span-1 md:row-span-2' : 'col-span-1'}`}
           >
-            <Link to={`/noticia/${news.id}`} className="block h-full">
-              <div className="aspect-[16/9] overflow-hidden bg-zinc-50">
+            <Link to={`/noticia/${news.id}`} className="block h-full flex flex-col">
+              <div className={`overflow-hidden bg-zinc-50 flex-shrink-0 ${isFeatured ? 'aspect-[16/9] lg:aspect-[2/1]' : 'aspect-[16/9]'}`}>
                 <img 
                   src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
                   alt={news.title} 
@@ -1857,7 +1859,7 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
                   }}
                 />
               </div>
-              <div className="p-4">
+              <div className={`p-4 flex flex-col flex-grow ${isFeatured ? 'md:p-6 lg:p-8' : ''}`}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-zinc-400 text-[9px] font-bold uppercase tracking-wider">
                     {news.category}
@@ -1866,10 +1868,10 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
                     <span className="text-zinc-300 text-[9px] font-medium">{formatDate(news.date)}</span>
                   )}
                 </div>
-                <h3 className="text-sm font-bold mb-2 group-hover:text-zinc-700 transition-colors line-clamp-2 leading-snug">{news.title}</h3>
-                <p className="text-zinc-500 text-[11px] line-clamp-2 leading-snug mb-4">{news.summary}</p>
+                <h3 className={`font-bold mb-2 group-hover:text-zinc-700 transition-colors leading-snug ${isFeatured ? 'text-xl md:text-2xl lg:text-3xl line-clamp-3' : 'text-sm line-clamp-2'}`}>{news.title}</h3>
+                <p className={`text-zinc-500 leading-snug mb-4 ${isFeatured ? 'text-sm md:text-base line-clamp-3' : 'text-[11px] line-clamp-2'}`}>{news.summary}</p>
                 <div className="flex items-center justify-between mt-auto pt-3 border-t border-zinc-50">
-                  <span className="text-[10px] font-bold hover:underline">
+                  <span className={`${isFeatured ? 'text-xs' : 'text-[10px]'} font-bold hover:underline`}>
                     Ler mais
                   </span>
                   <button 
@@ -1895,7 +1897,7 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
               </div>
             </Link>
           </motion.div>
-          ))
+          )})
         ) : (
           <div className="col-span-1 sm:col-span-3 lg:col-span-4 flex flex-col items-center justify-center text-center py-16 bg-white border border-zinc-100 rounded-xl">
             <Search className="w-8 h-8 text-zinc-300 mb-3" />
