@@ -1123,6 +1123,10 @@ const Home = ({ data }: { data: SiteData | null }) => {
 
   const visibleNews = allNews.slice(0, newsLimit);
 
+  const specialNews = useMemo(() => {
+    return allNews.filter(n => n.category?.toLowerCase() === 'especial');
+  }, [allNews]);
+
   const location = useLocation();
   const canonicalUrl = window.location.origin + location.pathname;
 
@@ -1378,6 +1382,62 @@ const Home = ({ data }: { data: SiteData | null }) => {
                 </div>
               );
             })}
+          </div>
+        </section>
+      )}
+
+      {specialNews.length > 0 && (
+        <section className="mt-12 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-display font-bold tracking-tight">Especiais</h2>
+            <Link to="/noticias?category=Especial" className="text-xs font-bold text-zinc-500 hover:text-zinc-900 transition-colors">
+              Ver todos os nossos especiais
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {specialNews.slice(0, 3).map((n, i) => (
+              <motion.div 
+                key={n.id || i}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                className="group bg-white rounded-xl overflow-hidden border border-zinc-100 hover:border-zinc-200 transition-all"
+              >
+                <Link to={`/noticia/${n.id}`} className="block h-full flex flex-col">
+                  <div className="aspect-[16/9] overflow-hidden bg-zinc-50 flex-shrink-0">
+                    <img 
+                      src={n.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${n.id}.jpg`} 
+                      alt={n.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (!target.src.includes('logo.png')) {
+                          target.src = 'https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/logo.png';
+                          target.classList.add('invert', 'object-contain', 'p-6', 'bg-zinc-50');
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="p-4 flex flex-col flex-grow">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-zinc-400 text-[9px] font-bold uppercase tracking-wider">
+                        {n.category}
+                      </span>
+                      {n.category !== 'Institucional' && (
+                        <span className="text-zinc-300 text-[9px]">{formatDate(n.date)}</span>
+                      )}
+                    </div>
+                    <h3 className="text-sm font-bold group-hover:text-zinc-700 transition-colors line-clamp-2 leading-snug mb-2">{n.title}</h3>
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className="text-[10px] font-bold hover:underline">
+                        Ler mais
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
           </div>
         </section>
       )}
