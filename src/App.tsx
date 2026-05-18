@@ -1929,7 +1929,7 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
                   )}
                 </div>
                 <h3 className={`font-bold mb-2 group-hover:text-zinc-700 transition-colors leading-snug ${isFeatured ? 'text-xl md:text-2xl lg:text-3xl line-clamp-3' : 'text-sm line-clamp-2'}`}>{news.title}</h3>
-                <p className={`text-zinc-500 leading-snug mb-4 ${isFeatured ? 'text-sm md:text-base line-clamp-3' : 'text-[11px] line-clamp-2'}`}>{news.summary}</p>
+                <p className={`text-zinc-500 leading-snug mb-4 ${isFeatured ? 'text-sm md:text-base' : 'text-[11px]'}`}>{news.summary}</p>
                 <div className="flex items-center justify-between mt-auto pt-3 border-t border-zinc-50">
                   <span className={`${isFeatured ? 'text-xs' : 'text-[10px]'} font-bold hover:underline`}>
                     Ler mais
