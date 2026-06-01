@@ -55,6 +55,28 @@ O carregamento primário (o fetch de `base.json`) e do estado de loading ocupam 
 2. Dentro do hook, manter `useState` para os dados, loading e tracking de erros; e o `useEffect` que executa efetivamente a chamada para `/base.json`.
 3. Retornar um objeto ou array: `return { data, loading, error };`.
 
+## 7. Implementação de React Error Boundaries
+Atualmente, se ocorrer um erro em um componente durante a renderização (ex: dado mal formatado no base.json), a tela inteira fica em branco.
+
+**Passo a passo:**
+1. Adicionar e utilizar a biblioteca `react-error-boundary` (ou classe nativa de Error Boundary).
+2. Envolver componentes de seções específicas ou páginas em um `<ErrorBoundary fallback={<ErrorDisplay />}>`.
+3. Exibir uma UI amigável em caso de erro, oferecendo ao usuário um botão para recarregar a página sem quebrar todo o Front-End da aplicação.
+
+## 8. Acessibilidade (A11y) e Reset de Foco de Rota
+Sendo um SPA (React Router), ao mudar de página, o foco não retorna ao topo para leitores de tela e muitas imagens podem estar sem atributos apropriados.
+
+**Passo a passo:**
+1. Criar um componente utilitário `ScrollToTop` ou hook global baseando no evento da mudança de localidade do Router, que manipula o `window.scrollTo(0,0)` e devolve o foco para a tag `<h1>` principal.
+2. Revisar todas as tags `<img>` e botões soltos (como barras de menu) para assegurar o uso adequado das tags `aria-label` e `alt` consistentes.
+
+## 9. Otimização Avançada de Imagens e Recursos
+O uso apenas de `<img>` não garante otimização de imagens, impactando o Web Vitals LCP (Largest Contentful Paint).
+
+**Passo a passo:**
+1. Aplicar sistematicamente as tags `loading="lazy"` e `decoding="async"` nas imagens que ficam abaixo da dobra (off-screen).
+2. Transição estrutural visando imagens em novos formatos (WebP/AVIF) preferencialmente utilizando a tag `<picture>` (HTML Nativo) combinada com fallback.
+
 ---
 **Observação Estratégica:**
-Na implementação futura destas sugestões, recomenda-se que as modificações sejam realizadas progressivamente (um passo por vez) compilando o site para garantir que as rotas antigas permaneçam intactas antes de partir para a segunda dica.
+Na implementação futura destas sugestões, recomenda-se que as modificações sejam realizadas progressivamente (um passo por vez) compilando o site para garantir que as rotas antigas permaneçam intactas antes de partir para a próxima dica.
