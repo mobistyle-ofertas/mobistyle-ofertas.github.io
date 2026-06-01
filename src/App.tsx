@@ -173,6 +173,7 @@ const ShareButtons = ({ title, url }: { title: string; url: string }) => {
           onClick={handleNativeShare}
           className="p-2 rounded-full bg-zinc-100 text-zinc-600 hover:bg-zinc-900 hover:text-white transition-all"
           title="Compartilhar"
+          aria-label="Compartilhar"
         >
           <Share2 className="w-4 h-4" />
         </button>
@@ -195,6 +196,7 @@ const ShareButtons = ({ title, url }: { title: string; url: string }) => {
         onClick={handleCopy}
         className={`p-2 rounded-full transition-all flex items-center gap-2 ${copied ? 'bg-green-100 text-green-600' : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-900 hover:text-white'}`}
         title="Copiar link"
+        aria-label="Copiar link"
       >
         <Copy className="w-4 h-4" />
         {copied && <span className="text-[10px] font-bold pr-1">Copiado!</span>}
@@ -207,6 +209,15 @@ const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
+    // Accessibility: Reset focus to the main content wrapper or h1
+    const mainHeading = document.querySelector('h1',);
+    if (mainHeading) {
+      if (!mainHeading.hasAttribute('tabindex')) {
+        mainHeading.setAttribute('tabindex', '-1');
+      }
+      mainHeading.style.outline = 'none';
+      mainHeading.focus();
+    }
   }, [pathname]);
   return null;
 };
@@ -282,7 +293,7 @@ const Navbar = ({ data }: { data: SiteData | null }) => {
           </div>
 
           <div className="md:hidden flex items-center">
-            <button onClick={() => setIsOpen(!isOpen)} className="text-zinc-600">
+            <button onClick={() => setIsOpen(!isOpen)} className="text-zinc-600" aria-label="Menu principal">
               {isOpen ? <X /> : <Menu />}
             </button>
           </div>
@@ -708,7 +719,7 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
             <div className="mt-4 sm:mt-6 border border-zinc-200 rounded-2xl overflow-hidden bg-white">
               {model1.image && (
                 <div className="aspect-[4/3] bg-zinc-100 flex items-center justify-center p-3 sm:p-6 mix-blend-multiply">
-                  <img src={model1.image} alt={model1.name} className="w-full h-full object-contain mix-blend-multiply" />
+                  <img loading="lazy" decoding="async" src={model1.image} alt={model1.name} className="w-full h-full object-contain mix-blend-multiply" />
                 </div>
               )}
               <div className="p-3 sm:p-6 text-center sm:text-left">
@@ -735,7 +746,7 @@ const CompareModels = ({ data }: { data: SiteData | null }) => {
             <div className="mt-4 sm:mt-6 border border-zinc-200 rounded-2xl overflow-hidden bg-white">
               {model2.image && (
                 <div className="aspect-[4/3] bg-zinc-100 flex items-center justify-center p-3 sm:p-6 mix-blend-multiply">
-                  <img src={model2.image} alt={model2.name} className="w-full h-full object-contain mix-blend-multiply" />
+                  <img loading="lazy" decoding="async" src={model2.image} alt={model2.name} className="w-full h-full object-contain mix-blend-multiply" />
                 </div>
               )}
               <div className="p-3 sm:p-6 text-center sm:text-left">
@@ -1197,8 +1208,7 @@ const Home = ({ data }: { data: SiteData | null }) => {
                 className={`group relative rounded-2xl overflow-hidden border border-zinc-100 transition-all duration-300 ${gridClass}`}
               >
                 <Link to={`/noticia/${news.id}`} className="block w-full h-full">
-                  <img 
-                    src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
+                  <img loading="lazy" decoding="async" src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
                     alt={news.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     referrerPolicy="no-referrer"
@@ -1274,8 +1284,7 @@ const Home = ({ data }: { data: SiteData | null }) => {
               >
                 <Link to={`/noticia/${news.id}`} className="flex sm:block items-center">
                   <div className="w-24 h-24 sm:w-full sm:h-48 overflow-hidden bg-zinc-50 flex-shrink-0">
-                    <img 
-                      src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
+                    <img loading="lazy" decoding="async" src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
                       alt={news.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
@@ -1424,8 +1433,7 @@ const Home = ({ data }: { data: SiteData | null }) => {
               >
                 <Link to={`/noticia/${n.id}`} className="block h-full flex flex-col">
                   <div className="aspect-[16/9] overflow-hidden bg-zinc-50 flex-shrink-0">
-                    <img 
-                      src={n.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${n.id}.jpg`} 
+                    <img loading="lazy" decoding="async" src={n.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${n.id}.jpg`} 
                       alt={n.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
@@ -1680,8 +1688,7 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
             className={`group bg-white rounded-xl border border-zinc-100 overflow-hidden hover:border-zinc-300 transition-all ${isMenuMode ? 'p-1.5' : ''}`}
           >
             <div className={`${isMenuMode ? 'aspect-square rounded-lg' : 'aspect-[4/3]'} bg-zinc-50 flex items-center justify-center overflow-hidden`}>
-              <img 
-                src={(model as any).displayImage || model.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/${model.id}.jpg`} 
+              <img loading="lazy" decoding="async" src={(model as any).displayImage || model.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/${model.id}.jpg`} 
                 alt={model.name}
                 className={`w-full h-full group-hover:scale-105 transition-transform duration-500 ${isMenuMode ? 'object-contain p-4 mix-blend-multiply' : 'object-cover'}`}
                 referrerPolicy="no-referrer"
@@ -1938,8 +1945,7 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
           >
             <Link to={`/noticia/${news.id}`} className="block h-full flex flex-col">
               <div className={`overflow-hidden bg-zinc-50 flex-shrink-0 ${isFeatured ? 'aspect-[16/9] lg:aspect-[2/1]' : 'aspect-[16/9]'}`}>
-                <img 
-                  src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
+                <img loading="lazy" decoding="async" src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
                   alt={news.title} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
@@ -2245,8 +2251,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
         </div>
 
         <div className="rounded-2xl overflow-hidden mb-8 bg-zinc-50 border border-zinc-100">
-          <img 
-            src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
+          <img loading="lazy" decoding="async" src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
             alt={news.title} 
             className="w-full h-auto block"
             referrerPolicy="no-referrer"
@@ -2295,8 +2300,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                                   {offer.discount}
                                 </div>
                               )}
-                              <img 
-                                src={offer.image} 
+                              <img loading="lazy" decoding="async" src={offer.image} 
                                 alt={offer.name} 
                                 className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                                 referrerPolicy="no-referrer"
@@ -2363,8 +2367,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                 className="flex items-center gap-3 p-3 bg-white rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all group"
               >
                 <div className="w-16 h-16 bg-zinc-50 rounded-lg overflow-hidden flex-shrink-0">
-                  <img 
-                    src={model.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/${model.id}.jpg`} 
+                  <img loading="lazy" decoding="async" src={model.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/models/${model.id}.jpg`} 
                     alt={model.name}
                     className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
@@ -2401,8 +2404,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
                 className={`group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex-col ${i === 4 ? 'hidden lg:flex' : 'flex'}`}
               >
                 <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
-                  <img 
-                    src={offer.image} 
+                  <img loading="lazy" decoding="async" src={offer.image} 
                     alt={offer.name} 
                     className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
@@ -2480,8 +2482,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
               >
                 <Link to={`/noticia/${n.id}`}>
                   <div className="aspect-[16/9] overflow-hidden bg-zinc-50">
-                    <img 
-                      src={n.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${n.id}.jpg`} 
+                    <img loading="lazy" decoding="async" src={n.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${n.id}.jpg`} 
                       alt={n.title} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       referrerPolicy="no-referrer"
@@ -2660,8 +2661,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                   className="group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col"
                 >
                   <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
-                    <img 
-                      src={item.image} 
+                    <img loading="lazy" decoding="async" src={item.image} 
                       alt={item.name} 
                       className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
@@ -2721,8 +2721,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                   className={`group bg-white p-4 rounded-2xl border border-zinc-100 hover:border-zinc-900 transition-all flex-col ${i === 4 ? 'hidden lg:flex' : 'flex'}`}
                 >
                   <div className="aspect-square rounded-xl overflow-hidden mb-4 bg-zinc-50">
-                    <img 
-                      src={offer.image} 
+                    <img loading="lazy" decoding="async" src={offer.image} 
                       alt={offer.name} 
                       className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
@@ -2804,8 +2803,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
               animate={{ opacity: 1 }}
               className="aspect-[4/3] -mx-4 sm:-mx-6 md:mx-0 rounded-none md:rounded-2xl overflow-hidden bg-zinc-50 border border-zinc-100"
             >
-              <img 
-                src={model.image} 
+              <img loading="lazy" decoding="async" src={model.image} 
                 alt={model.name} 
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
@@ -2930,8 +2928,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                       className="group bg-white rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col overflow-hidden"
                     >
                       <div className="aspect-[16/9] overflow-hidden bg-zinc-50">
-                        <img 
-                          src={n.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${n.id}.jpg`} 
+                        <img loading="lazy" decoding="async" src={n.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${n.id}.jpg`} 
                           alt={n.title} 
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           referrerPolicy="no-referrer"
@@ -3027,8 +3024,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                   className="group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex flex-col"
                 >
                   <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
-                    <img 
-                      src={item.image} 
+                    <img loading="lazy" decoding="async" src={item.image} 
                       alt={item.name} 
                       className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
@@ -3087,8 +3083,7 @@ const ModelPage = ({ data }: { data: SiteData | null }) => {
                 className={`group bg-white p-3 rounded-xl border border-zinc-100 hover:border-zinc-300 transition-all flex-col ${i === 4 ? 'hidden lg:flex' : 'flex'}`}
               >
                 <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-zinc-50">
-                  <img 
-                    src={offer.image} 
+                  <img loading="lazy" decoding="async" src={offer.image} 
                     alt={offer.name} 
                     className="w-full h-full object-contain p-2 mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
                       referrerPolicy="no-referrer"
