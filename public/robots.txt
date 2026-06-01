@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
 Disallow: /backlog.md
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-News
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
 Sitemap: https://mobistyle-ofertas.github.io/sitemap.xml
