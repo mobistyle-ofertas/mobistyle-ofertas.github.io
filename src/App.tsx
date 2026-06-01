@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 // Force change for git synchronization - Sync 2
 import ReactMarkdown from 'react-markdown';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, useLocation } from 'react-router-dom';
-import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy, ShoppingBag, CheckCircle2, XCircle, AlertCircle, ArrowUp, ArrowDown, Search } from 'lucide-react';
+import { Bike, Cpu, Shield, ChevronRight, ExternalLink, Tag, Menu, X, ArrowRight, ChevronDown, Music, MessagesSquare, MessageCircleCheck, Share2, Copy, ShoppingBag, CheckCircle2, XCircle, AlertCircle, ArrowUp, ArrowDown, Search, Newspaper } from 'lucide-react';
 
 // Custom Brand Icons (removed from recent lucide-react versions)
 const Instagram = (props: any) => (
@@ -116,6 +116,7 @@ interface SiteData {
     bluesky?: string;
     tiktok?: string;
     whatsapp?: string;
+    googleNews?: string;
   };
 }
 
@@ -381,6 +382,11 @@ const Footer = ({ data }: { data: SiteData | null }) => (
               {data.socialLinks.whatsapp && (
                 <a href={data.socialLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="WhatsApp">
                   <MessageCircleCheck className="w-8 h-8" />
+                </a>
+              )}
+              {data.socialLinks.googleNews && (
+                <a href={data.socialLinks.googleNews} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Google Notícias">
+                  <Newspaper className="w-8 h-8" />
                 </a>
               )}
               <a href="https://www.mercadolivre.com.br/social/thiagoleopoldo" target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-white transition-colors" title="Mercado Livre">
@@ -1158,7 +1164,20 @@ const Home = ({ data }: { data: SiteData | null }) => {
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-display font-bold tracking-tight">Últimas Notícias</h2>
-          <div className="h-px flex-grow mx-6 bg-zinc-100 hidden sm:block"></div>
+          <div className="flex-grow mx-6 bg-zinc-100 hidden sm:block h-px"></div>
+          {data.socialLinks?.googleNews && (
+            <a 
+              href={data.socialLinks.googleNews} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-zinc-900 text-white hover:bg-zinc-800 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
+              title="Seguir no Google Notícias"
+            >
+              <Newspaper className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Seguir no Google Notícias</span>
+              <span className="sm:hidden">Seguir</span>
+            </a>
+          )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:auto-rows-[240px] mb-6">
           {visibleNews.slice(0, 4).map((news, idx) => {
@@ -1846,9 +1865,23 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
         <meta property="twitter:image" content={`https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/sobre.png`} />
       </Helmet>
       <div className="flex flex-col gap-6 mb-8">
-        <div>
-          <h1 className="text-3xl font-display font-bold mb-2 tracking-tight">Todas as Notícias</h1>
-          <p className="text-zinc-500 text-sm">Fique por dentro das novidades do mundo das duas rodas.</p>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-display font-bold mb-2 tracking-tight">Todas as Notícias</h1>
+            <p className="text-zinc-500 text-sm">Fique por dentro das novidades do mundo das duas rodas.</p>
+          </div>
+          {data.socialLinks?.googleNews && (
+            <a 
+              href={data.socialLinks.googleNews} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 text-white hover:bg-zinc-800 rounded-full text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
+              title="Seguir no Google Notícias"
+            >
+              <Newspaper className="w-4 h-4" />
+              <span>Seguir no Google Notícias</span>
+            </a>
+          )}
         </div>
         
         {/* Category Filters */}
@@ -2119,6 +2152,7 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
       <Helmet>
         <title>{news.title} | MobiStyle</title>
         <meta name="description" content={news.summary} />
+        <meta name="robots" content="max-image-preview:large" />
         <link rel="canonical" href={canonicalUrl} />
 
         {/* Open Graph / Facebook */}
@@ -2137,6 +2171,21 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
         <meta property="twitter:title" content={`${news.title} | MobiStyle`} />
         <meta property="twitter:description" content={news.summary} />
         <meta property="twitter:image" content={newsImage} />
+
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "NewsArticle",
+            "headline": news.title,
+            "image": [newsImage],
+            "datePublished": news.date,
+            "author": [{
+              "@type": "Organization",
+              "name": "MobiStyle Ofertas",
+              "url": window.location.origin
+            }]
+          })}
+        </script>
       </Helmet>
 
       <div className="mb-8">
@@ -2157,11 +2206,15 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
           )}
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-display font-bold mb-6 tracking-tight leading-tight">
+        <h1 className="text-3xl md:text-4xl font-display font-bold mb-4 tracking-tight leading-tight">
           {news.title}
         </h1>
 
-        <div className="flex items-center justify-between mb-8 pb-6 border-b border-zinc-100">
+        <p className="text-lg md:text-xl text-zinc-500 mb-6 leading-relaxed mb-6 border-l-4 border-zinc-200 pl-4 py-1">
+          {news.summary}
+        </p>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-100">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-white text-[10px] font-bold">
               MS
@@ -2173,7 +2226,22 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
               )}
             </div>
           </div>
-          <ShareButtons title={news.title} url={`/noticia/${news.id}`} />
+          <div className="flex items-center gap-3 sm:gap-4">
+            {data.socialLinks?.googleNews && (
+              <a 
+                href={data.socialLinks.googleNews} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 text-zinc-900 hover:bg-zinc-200 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors shrink-0"
+                title="Seguir no Google Notícias"
+              >
+                <Newspaper className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Seguir no Google Notícias</span>
+                <span className="sm:hidden">Seguir</span>
+              </a>
+            )}
+            <ShareButtons title={news.title} url={`/noticia/${news.id}`} />
+          </div>
         </div>
 
         <div className="rounded-2xl overflow-hidden mb-8 bg-zinc-50 border border-zinc-100">
@@ -2257,9 +2325,30 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
           })()}
         </div>
 
-        <div className="flex flex-col items-center gap-4 py-8 border-y border-zinc-100 mb-12">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Gostou da notícia? Compartilhe!</span>
-          <ShareButtons title={news.title} url={`/noticia/${news.id}`} />
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 py-6 md:py-8 border-y border-zinc-100 mb-12">
+          {data.socialLinks?.googleNews && (
+            <div className="flex flex-col items-center md:items-start gap-2 flex-1 w-full text-center md:text-left">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-900">Não perca nada!</span>
+              <p className="text-xs text-zinc-500 leading-relaxed mb-1 max-w-sm">
+                Favorite o <strong>MobiStyle Ofertas</strong> no Google e receba primeiro as atualizações de tecnologia e motociclismo.
+              </p>
+              <a 
+                href={data.socialLinks.googleNews} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white hover:bg-zinc-800 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm"
+                title="Favoritar no Google"
+              >
+                <Newspaper className="w-3.5 h-3.5" />
+                <span>Favoritar no Google</span>
+              </a>
+            </div>
+          )}
+          
+          <div className="flex flex-col items-center md:items-end gap-3 flex-shrink-0 w-full md:w-auto pt-6 md:pt-0 border-t md:border-t-0 border-zinc-100">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Gostou da notícia? Compartilhe!</span>
+            <ShareButtons title={news.title} url={`/noticia/${news.id}`} />
+          </div>
         </div>
       </div>
 
