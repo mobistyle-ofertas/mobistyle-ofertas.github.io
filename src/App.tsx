@@ -1176,19 +1176,6 @@ const Home = ({ data }: { data: SiteData | null }) => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-display font-bold tracking-tight">Últimas Notícias</h2>
           <div className="flex-grow mx-6 bg-zinc-100 hidden sm:block h-px"></div>
-          {data.socialLinks?.googleNews && (
-            <a 
-              href={data.socialLinks.googleNews} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-zinc-900 text-white hover:bg-zinc-800 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
-              title="Seguir no Google Notícias"
-            >
-              <Newspaper className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span className="hidden sm:inline">Seguir no Google Notícias</span>
-              <span className="sm:hidden">Seguir</span>
-            </a>
-          )}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:auto-rows-[240px] mb-6">
           {visibleNews.slice(0, 4).map((news, idx) => {
@@ -1882,7 +1869,7 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
               href={data.socialLinks.googleNews} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-900 text-white hover:bg-zinc-800 rounded-full text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-900 hover:bg-zinc-200 rounded-full text-xs font-bold uppercase tracking-wider transition-colors shrink-0"
               title="Seguir no Google Notícias"
             >
               <Newspaper className="w-4 h-4" />
@@ -2329,30 +2316,9 @@ const NewsDetail = ({ data }: { data: SiteData | null }) => {
           })()}
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 py-6 md:py-8 border-y border-zinc-100 mb-12">
-          {data.socialLinks?.googleNews && (
-            <div className="flex flex-col items-center md:items-start gap-2 flex-1 w-full text-center md:text-left">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-900">Não perca nada!</span>
-              <p className="text-xs text-zinc-500 leading-relaxed mb-1 max-w-sm">
-                Favorite o <strong>MobiStyle Ofertas</strong> no Google e receba primeiro as atualizações de tecnologia e motociclismo.
-              </p>
-              <a 
-                href={data.socialLinks.googleNews} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white hover:bg-zinc-800 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm"
-                title="Favoritar no Google"
-              >
-                <Newspaper className="w-3.5 h-3.5" />
-                <span>Favoritar no Google</span>
-              </a>
-            </div>
-          )}
-          
-          <div className="flex flex-col items-center md:items-end gap-3 flex-shrink-0 w-full md:w-auto pt-6 md:pt-0 border-t md:border-t-0 border-zinc-100">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Gostou da notícia? Compartilhe!</span>
-            <ShareButtons title={news.title} url={`/noticia/${news.id}`} />
-          </div>
+        <div className="flex flex-col items-center gap-4 py-8 border-y border-zinc-100 mb-12">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Gostou da notícia? Compartilhe!</span>
+          <ShareButtons title={news.title} url={`/noticia/${news.id}`} />
         </div>
       </div>
 

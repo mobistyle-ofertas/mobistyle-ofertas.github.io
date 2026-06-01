@@ -77,6 +77,14 @@ O uso apenas de `<img>` não garante otimização de imagens, impactando o Web V
 1. Aplicar sistematicamente as tags `loading="lazy"` e `decoding="async"` nas imagens que ficam abaixo da dobra (off-screen).
 2. Transição estrutural visando imagens em novos formatos (WebP/AVIF) preferencialmente utilizando a tag `<picture>` (HTML Nativo) combinada com fallback.
 
+## 10. Reintrodução do Botão "Seguir/Favoritar no Google Notícias"
+O botão "Seguir no Google Notícias" foi removido temporariamente do topo da Home Page e do rodapé da página de detalhes da notícia (News Detail) para não chamar atenção enquanto o site ainda não foi indexado nas fontes preferidas.
+
+**Passo a passo:**
+1. Monitorar a indexação do site no Google Notícias.
+2. Quando o site for validado e estiver com tráfego relevante no formato, reintroduzir o botão `<a href={data.socialLinks.googleNews} ...>` no componente `Home` ao lado do título "Últimas Notícias".
+3. Reintroduzir o bloco "Não perca nada! Favorite o MobiStyle Ofertas..." com o respectivo botão abaixo do conteúdo da notícia no componente `NewsDetail`.
+
 ---
 **Observação Estratégica:**
 Na implementação futura destas sugestões, recomenda-se que as modificações sejam realizadas progressivamente (um passo por vez) compilando o site para garantir que as rotas antigas permaneçam intactas antes de partir para a próxima dica.
