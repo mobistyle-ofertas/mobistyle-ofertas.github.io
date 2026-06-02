@@ -45,7 +45,7 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { supabase } from './lib/supabase';
 import Analytics from './components/Analytics';
 
-const formatDate = (dateStr: string) => {
+export const formatDate = (dateStr: string) => {
   if (!dateStr) return '';
   if (dateStr.includes('/')) return dateStr;
   const parts = dateStr.split('T')[0].split('-');
@@ -56,7 +56,7 @@ const formatDate = (dateStr: string) => {
 
 // Types
 // ... (rest of types)
-interface NewsItem {
+export interface NewsItem {
   id: string;
   modelIds?: string[];
   title: string;
@@ -106,7 +106,7 @@ interface Category {
   icon: string;
 }
 
-interface SiteData {
+export interface SiteData {
   categories: Category[];
   models: Model[];
   homeNews: NewsItem[];
@@ -1922,6 +1922,14 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
         {filteredNews.length > 0 ? (
           filteredNews.slice(0, visibleCount).map((news, idx) => {
             const isFeatured = idx === 0;
+            
+            const getFirstParagraph = (content: string) => {
+              if (!content) return '';
+              const normalized = content.replace(/\\n/g, '\n').replace(/\r\n/g, '\n');
+              const index = normalized.indexOf('\n\n');
+              return index !== -1 ? normalized.substring(0, index) : normalized;
+            };
+
             return (
           <motion.div 
             key={idx}
@@ -1931,10 +1939,10 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
             className={`group bg-white rounded-xl overflow-hidden border border-zinc-100 hover:border-zinc-200 transition-all flex flex-col ${isFeatured ? 'sm:col-span-2 md:col-span-2 lg:col-span-2 sm:row-span-1 md:row-span-2' : 'col-span-1'}`}
           >
             <Link to={`/noticia/${news.id}`} className="block h-full flex flex-col">
-              <div className={`overflow-hidden bg-zinc-50 flex-shrink-0 ${isFeatured ? 'aspect-[16/9] lg:aspect-[2/1]' : 'aspect-[16/9]'}`}>
+              <div className={`overflow-hidden bg-zinc-50 flex-shrink-0 ${isFeatured ? 'flex items-center justify-center' : 'aspect-[16/9]'}`}>
                 <img loading="lazy" decoding="async" src={news.image || `https://hneczrjshjpxrlstqdda.supabase.co/storage/v1/object/public/MobiStyle/news/${news.id}.jpg`} 
                   alt={news.title} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className={`w-full bg-zinc-50 group-hover:scale-105 transition-transform duration-500 ${isFeatured ? 'h-auto object-contain max-h-[350px] md:max-h-[400px]' : 'h-full object-cover'}`}
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -1947,17 +1955,30 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
               </div>
               <div className={`p-4 flex flex-col flex-grow ${isFeatured ? 'md:p-6 lg:p-8' : ''}`}>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-zinc-400 text-[9px] font-bold uppercase tracking-wider">
+                  <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
                     {news.category}
                   </span>
                   {news.category !== 'Institucional' && (
-                    <span className="text-zinc-300 text-[9px] font-medium">{formatDate(news.date)}</span>
+                    <span className="text-zinc-300 text-[10px] font-medium">{formatDate(news.date)}</span>
                   )}
                 </div>
-                <h3 className={`font-bold mb-2 group-hover:text-zinc-700 transition-colors leading-snug ${isFeatured ? 'text-xl md:text-2xl lg:text-3xl line-clamp-3' : 'text-sm line-clamp-2'}`}>{news.title}</h3>
-                <p className={`text-zinc-500 leading-snug mb-4 ${isFeatured ? 'text-sm md:text-base' : 'text-[11px]'}`}>{news.summary}</p>
-                <div className="flex items-center justify-between mt-auto pt-3 border-t border-zinc-50">
-                  <span className={`${isFeatured ? 'text-xs' : 'text-[10px]'} font-bold hover:underline`}>
+                <h3 className={`font-bold mb-2 group-hover:text-zinc-700 transition-colors leading-snug ${isFeatured ? 'text-xl md:text-2xl lg:text-3xl' : 'text-base'}`}>{news.title}</h3>
+                <div className={`text-zinc-500 leading-relaxed mb-0 ${isFeatured ? 'text-[14px]' : 'text-[13px]'} [&>p]:m-0 [&>p]:inline`}>
+                  {isFeatured ? (
+                    <div className="flex flex-col gap-3">
+                      <div className="font-medium [&>p]:m-0 [&>p]:inline">
+                        <ReactMarkdown components={{ p: 'span' }}>{news.summary || ''}</ReactMarkdown>
+                      </div>
+                      <div className="text-[13px] opacity-80 [&>p]:m-0 [&>p]:inline">
+                        <ReactMarkdown components={{ p: 'span' }}>{getFirstParagraph(news.content)}</ReactMarkdown>
+                      </div>
+                    </div>
+                  ) : (
+                    <ReactMarkdown components={{ p: 'span' }}>{news.summary || ''}</ReactMarkdown>
+                  )}
+                </div>
+                <div className="flex items-center justify-between mt-auto pt-3 border-t border-zinc-50 flex-shrink-0">
+                  <span className={`${isFeatured ? 'text-xs' : 'text-[11px]'} font-bold hover:underline`}>
                     Ler mais
                   </span>
                   <button 
