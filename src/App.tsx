@@ -1771,7 +1771,7 @@ const CategoryPage = ({ data }: { data: SiteData | null }) => {
 };
 
 const NewsList = ({ data }: { data: SiteData | null }) => {
-  const [visibleCount, setVisibleCount] = useState(12);
+  const [visibleCount, setVisibleCount] = useState(24);
   const [allNews, setAllNews] = useState<NewsItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const location = useLocation();
@@ -1819,8 +1819,8 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
-        setVisibleCount(prev => Math.min(prev + 6, filteredNews.length));
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1500) {
+        setVisibleCount(prev => Math.min(prev + 12, filteredNews.length));
       }
     };
     window.addEventListener('scroll', handleScroll);
