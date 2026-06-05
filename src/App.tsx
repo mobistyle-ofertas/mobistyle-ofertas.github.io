@@ -1969,7 +1969,7 @@ const NewsList = ({ data }: { data: SiteData | null }) => {
                       <div className="font-medium [&>p]:m-0 [&>p]:inline">
                         <ReactMarkdown components={{ p: 'span' }}>{news.summary || ''}</ReactMarkdown>
                       </div>
-                      <div className="text-[13px] opacity-80 [&>p]:m-0 [&>p]:inline">
+                      <div className="text-[14px] opacity-80 [&>p]:m-0 [&>p]:inline">
                         <ReactMarkdown components={{ p: 'span' }}>{getFirstParagraph(news.content)}</ReactMarkdown>
                       </div>
                     </div>
